@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Dashboard Admin — Stock Monitoring System" />
+    <title>Dashboard Admin — Stock Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+    <link rel="stylesheet" href="../css/admin.css" />
+</head>
+
+<body>
+
+    <div class="app-shell">
+
+        <!-- ══ SIDEBAR ═══════════════════════════════════════════════ -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="sidebar-brand-name">StockMonitor</div>
+                    <div class="sidebar-brand-sub">Admin Panel</div>
+                </div>
+            </div>
+
+            <div class="sidebar-user">
+                <div class="sidebar-user-avatar admin" id="user-avatar">AD</div>
+                <div>
+                    <div class="sidebar-user-name" id="user-name">Loading...</div>
+                    <div class="sidebar-user-role" id="user-role">Administrator</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-item active" onclick="showSection('notifikasi')" id="nav-notifikasi">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                    Notifikasi Stok
+                    <span class="nav-badge" id="notif-badge" style="display:none">0</span>
+                </div>
+
+                <div class="nav-section-label">Kelola Data Barang</div>
+                <div class="nav-item" onclick="showSection('daftar')" id="nav-daftar">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" />
+                        <line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" />
+                        <line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
+                    </svg>
+                    Daftar Barang
+                </div>
+                <div class="nav-item" onclick="showSection('masuk')" id="nav-masuk">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Barang Masuk
+                </div>
+                <div class="nav-item" onclick="showSection('keluar')" id="nav-keluar">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+                        <path d="M15 18H9" />
+                        <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14" />
+                        <circle cx="17" cy="18" r="2" />
+                        <circle cx="7" cy="18" r="2" />
+                    </svg>
+                    Barang Keluar
+                </div>
+                <div class="nav-item" onclick="showSection('tambah-produk')" id="nav-tambah-produk">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    Daftarkan Produk Baru
+                </div>
+
+                <div class="nav-section-label">Sistem</div>
+                <div class="nav-item" onclick="showSection('laporan')" id="nav-laporan">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3v18h18" />
+                        <rect x="7" y="14" width="4" height="7" />
+                        <rect x="15" y="5" width="4" height="16" />
+                    </svg>
+                    Cek Laporan
+                </div>
+                <div class="nav-item" onclick="showSection('log')" id="nav-log">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
+                        <polyline points="10 9 9 9 8 9" />
+                    </svg>
+                    Log Sistem
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn-logout" onclick="logout()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- ══ MAIN ══════════════════════════════════════════════════ -->
+        <div class="main-area">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="topbar-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                    </button>
+                    <div>
+                        <div class="topbar-title" id="page-title">Notifikasi Stok</div>
+                        <div class="topbar-breadcrumb">Admin Panel</div>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-clock" id="topbar-clock"></div>
+                    <div class="topbar-btn" title="Notifikasi Stok" style="position:relative"
+                        onclick="showSection('notifikasi')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                        </svg>
+                        <span class="badge" id="header-notif-badge" style="display:none">0</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ══════════ NOTIFIKASI (Home) ══════════ -->
+            <div class="content" id="section-notifikasi">
+                <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h1>Selamat Datang, <span id="welcome-name">Admin</span> 👋</h1>
+                        <p>Notifikasi Stok: Sistem otomatis memperingatkan Anda ketika stok mencapai atau di bawah batas minimum</p>
+                    </div>
+                </div>
+                <div id="notif-content"></div>
+            </div>
+
+
+
+            <!-- ══════════ DAFTAR BARANG ══════════ -->
+            <div class="content" id="section-daftar" style="display:none">
+                <div class="page-header">
+                    <h1>Daftar Barang</h1>
+                    <p>Lihat dan kelola seluruh data barang di gudang</p>
+                </div>
+
+                <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+                    <div class="topbar-search" style="flex:1;min-width:200px;max-width:320px">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <input type="text" id="daftar-search" placeholder="Cari nama / SKU..." oninput="filterDaftar()" />
+                    </div>
+                    <select class="form-control" id="daftar-category" style="width:auto;padding:8px 12px"
+                        onchange="filterDaftar()">
+                        <option value="">Semua Kategori</option>
+                        <option value="Makanan">Makanan</option>
+                        <option value="Minuman">Minuman</option>
+                        <option value="Kebersihan">Kebersihan</option>
+                        <option value="Elektronik">Elektronik</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+
+                <div class="card" style="padding:0;overflow:hidden">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Produk</th><th>SKU</th><th>Kategori</th>
+                                    <th>Harga</th><th>Stok</th><th>Min Stok</th>
+                                    <th>Status</th><th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="daftar-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══════════ BARANG MASUK ══════════ -->
+            <div class="content" id="section-masuk" style="display:none">
+                <div class="page-header">
+                    <h1>Barang Masuk</h1>
+                    <p>Tambah jumlah stok untuk barang yang sudah ada di gudang</p>
+                </div>
+
+                <div class="admin-form-layout">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-title-icon"
+                                    style="background:hsla(152,65%,50%,.15);color:var(--accent-green)">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                        <polyline points="7 10 12 15 17 10" />
+                                        <line x1="12" y1="15" x2="12" y2="3" />
+                                    </svg>
+                                </div>
+                                Form Barang Masuk (Tambah Stok)
+                            </div>
+                        </div>
+                        <div class="form-row" style="grid-template-columns:1fr 1fr;gap:14px">
+                            <div class="form-group" style="grid-column:1/-1">
+                                <label class="form-label">Pilih Barang</label>
+                                <select class="form-control" id="masuk-product-id" onchange="fillMasukInfo()">
+                                    <option value="">-- Pilih Barang --</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="masuk-info-wrap" style="grid-column:1/-1;display:none">
+                                <div class="restock-info-box" id="masuk-info-box"></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Jumlah Masuk *</label>
+                                <input type="number" class="form-control" id="masuk-qty" placeholder="0" min="1" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Keterangan (opsional)</label>
+                                <input type="text" class="form-control" id="masuk-note"
+                                    placeholder="Mis: dari supplier, dsb." />
+                            </div>
+                        </div>
+                        <div style="margin-top:16px">
+                            <button class="btn btn-success" id="btn-masuk" onclick="processMasuk()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                                Konfirmasi Barang Masuk
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Log Barang Masuk -->
+                    <div class="card" style="grid-column:1/-1">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-title-icon"
+                                    style="background:hsla(152,65%,50%,.15);color:var(--accent-green)">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                        <polyline points="14 2 14 8 20 8" />
+                                    </svg>
+                                </div>
+                                Riwayat Barang Masuk
+                            </div>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Waktu</th><th>Barang</th><th>SKU</th>
+                                        <th>Jumlah Masuk</th><th>Stok Sebelum</th>
+                                        <th>Stok Sesudah</th><th>Keterangan</th><th>Admin</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="masuk-log-tbody">
+                                    <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted)">Belum ada data</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══════════ BARANG KELUAR ══════════ -->
+            <div class="content" id="section-keluar" style="display:none">
+                <div class="page-header">
+                    <h1>Barang Keluar</h1>
+                    <p>Kurangi jumlah stok untuk barang yang keluar dari gudang</p>
+                </div>
+
+                <div class="admin-form-layout">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-title-icon"
+                                    style="background:hsla(0,72%,58%,.15);color:var(--accent-red)">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+                                        <path d="M15 18H9" />
+                                        <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14" />
+                                        <circle cx="17" cy="18" r="2" />
+                                        <circle cx="7" cy="18" r="2" />
+                                    </svg>
+                                </div>
+                                Form Barang Keluar (Kurangi Stok)
+                            </div>
+                        </div>
+                        <div class="form-row" style="grid-template-columns:1fr 1fr;gap:14px">
+                            <div class="form-group" style="grid-column:1/-1">
+                                <label class="form-label">Pilih Barang</label>
+                                <select class="form-control" id="keluar-product-id" onchange="fillKeluarInfo()">
+                                    <option value="">-- Pilih Barang --</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="keluar-info-wrap" style="grid-column:1/-1;display:none">
+                                <div class="restock-info-box" id="keluar-info-box"></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Jumlah Keluar *</label>
+                                <input type="number" class="form-control" id="keluar-qty" placeholder="0" min="1" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Keterangan (opsional)</label>
+                                <input type="text" class="form-control" id="keluar-note"
+                                    placeholder="Mis: dijual, rusak, dsb." />
+                            </div>
+                        </div>
+                        <div style="margin-top:16px">
+                            <button class="btn btn-danger" id="btn-keluar" onclick="processKeluar()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                                Konfirmasi Barang Keluar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Log Barang Keluar -->
+                    <div class="card" style="grid-column:1/-1">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-title-icon"
+                                    style="background:hsla(0,72%,58%,.15);color:var(--accent-red)">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                        <polyline points="14 2 14 8 20 8" />
+                                    </svg>
+                                </div>
+                                Riwayat Barang Keluar
+                            </div>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Waktu</th><th>Barang</th><th>SKU</th>
+                                        <th>Jumlah Keluar</th><th>Stok Sebelum</th>
+                                        <th>Stok Sesudah</th><th>Keterangan</th><th>Admin</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="keluar-log-tbody">
+                                    <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted)">Belum ada data</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══════════ DAFTARKAN PRODUK BARU ══════════ -->
+            <div class="content" id="section-tambah-produk" style="display:none">
+                <div class="page-header">
+                    <h1>Daftarkan Produk Baru</h1>
+                    <p>Tambahkan barang baru yang belum ada dalam sistem gudang</p>
+                </div>
+
+                <div style="max-width:680px">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-title-icon"
+                                    style="background:hsla(245,78%,64%,.15);color:var(--primary)">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                                    </svg>
+                                </div>
+                                Data Produk Baru
+                            </div>
+                        </div>
+                        <div class="form-row" style="grid-template-columns:1fr 1fr;gap:14px">
+                            <div class="form-group" style="grid-column:1/-1">
+                                <label class="form-label">Nama Produk *</label>
+                                <input type="text" class="form-control" id="new-name" placeholder="Nama lengkap produk" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">SKU</label>
+                                <input type="text" class="form-control" id="new-sku" placeholder="MKN-006" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Kategori *</label>
+                                <select class="form-control" id="new-category">
+                                    <option value="Makanan">Makanan</option>
+                                    <option value="Minuman">Minuman</option>
+                                    <option value="Kebersihan">Kebersihan</option>
+                                    <option value="Elektronik">Elektronik</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Satuan Unit</label>
+                                <input type="text" class="form-control" id="new-unit" placeholder="pcs / dus / kg" value="pcs" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Harga (Rp) *</label>
+                                <input type="number" class="form-control" id="new-price" placeholder="0" min="0" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Stok Awal *</label>
+                                <input type="number" class="form-control" id="new-stock" placeholder="0" min="0" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Stok Minimum</label>
+                                <input type="number" class="form-control" id="new-min-stock" placeholder="10" min="1" value="10" />
+                            </div>
+                        </div>
+                        <div style="margin-top:20px;display:flex;gap:10px">
+                            <button class="btn btn-primary" id="btn-add-product" onclick="addNewProduct()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                                Daftarkan Produk
+                            </button>
+                            <button class="btn btn-secondary" onclick="resetNewProductForm()">Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══════════ CEK LAPORAN ══════════ -->
+            <div class="content" id="section-laporan" style="display:none">
+                <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h1>Cek Laporan</h1>
+                        <p>Laporan audit barang yang keluar berdasarkan rentang hari (paling banyak habis di kiri)</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="window.print()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px">
+                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                            <rect x="6" y="14" width="12" height="8"></rect>
+                        </svg>
+                        Cetak Laporan
+                    </button>
+                </div>
+                <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+                    <label style="font-size:.9rem; font-weight: 500;">Rentang Waktu:</label>
+                    <select class="form-control" id="laporan-days" style="width:auto;padding:8px 12px" onchange="loadLaporan()">
+                        <option value="7">7 Hari Terakhir</option>
+                        <option value="14">14 Hari Terakhir</option>
+                        <option value="30" selected>30 Hari Terakhir (Satu Bulan)</option>
+                    </select>
+                </div>
+                
+                <div class="card" style="padding: 20px;">
+                    <h3 style="margin-bottom: 20px; font-weight: 600; font-size: 1.1rem; text-align: center;">Laporan Barang Paling Banyak Habis (Keluar)</h3>
+                    <div style="position: relative; height: 400px; width: 100%;">
+                        <canvas id="laporanChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══════════ SYSTEM LOG ══════════ -->
+            <div class="content" id="section-log" style="display:none">
+                <div class="page-header">
+                    <h1>Log Sistem</h1>
+                    <p>
+                        Catatan otomatis setiap perubahan stok.
+                        <span class="badge badge-amber" style="font-size:.7rem;vertical-align:middle">🔒 Read-Only</span>
+                        Log tidak dapat diubah atau dihapus.
+                    </p>
+                </div>
+
+                <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+                    <select class="form-control" id="log-filter-type" style="width:auto;padding:8px 12px"
+                        onchange="loadLogs()">
+                        <option value="">Semua Jenis</option>
+                        <option value="MASUK">Barang Masuk</option>
+                        <option value="KELUAR">Barang Keluar</option>
+                        <option value="PRODUK_BARU">Produk Baru</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="loadLogs()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" />
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                        </svg>
+                        Refresh
+                    </button>
+                    <div class="log-immutable-note">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                        Log ini dibuat otomatis oleh sistem dan bersifat permanen
+                    </div>
+                </div>
+
+                <div class="card" style="padding:0;overflow:hidden">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th><th>Waktu</th><th>Jenis</th><th>Barang</th>
+                                    <th>SKU</th><th>Perubahan</th><th>Stok Sebelum</th>
+                                    <th>Stok Sesudah</th><th>Keterangan</th><th>Admin</th>
+                                </tr>
+                            </thead>
+                            <tbody id="log-tbody">
+                                <tr><td colspan="10" style="text-align:center;padding:32px;color:var(--text-muted)">Memuat log...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="log-pagination" style="padding:12px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══ Modal Edit Produk ══ -->
+    <div class="modal-overlay" id="modal-edit" style="display:none" onclick="if(event.target===this)closeEditModal()">
+        <div class="modal" style="max-width:460px;width:95vw">
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:20px">✏️ Edit Data Produk</h3>
+            <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:16px">
+                ⚠️ Edit ini hanya mengubah data informasi produk (nama, harga, stok minimum).
+                Untuk mengubah jumlah stok, gunakan menu Barang Masuk atau Barang Keluar.
+            </p>
+            <input type="hidden" id="edit-id" />
+            <div class="form-row" style="grid-template-columns:1fr 1fr;gap:12px">
+                <div class="form-group" style="grid-column:1/-1">
+                    <label class="form-label">Nama Produk</label>
+                    <input type="text" class="form-control" id="edit-name" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Harga (Rp)</label>
+                    <input type="number" class="form-control" id="edit-price" min="0" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Stok Minimum</label>
+                    <input type="number" class="form-control" id="edit-min-stock" min="1" />
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:20px">
+                <button class="btn btn-secondary" style="flex:1" onclick="closeEditModal()">Batal</button>
+                <button class="btn btn-primary" style="flex:1" id="btn-save-edit" onclick="saveEdit()">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ Modal Konfirmasi Masuk ══ -->
+    <div class="modal-overlay" id="modal-confirm-masuk" style="display:none"
+        onclick="if(event.target===this)closeConfirmMasuk()">
+        <div class="modal" style="max-width:400px;width:95vw">
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:12px">✅ Konfirmasi Barang Masuk</h3>
+            <p id="confirm-masuk-text" style="color:var(--text-secondary);margin-bottom:20px;font-size:.875rem"></p>
+            <div style="display:flex;gap:10px">
+                <button class="btn btn-secondary" style="flex:1" onclick="closeConfirmMasuk()">Batal</button>
+                <button class="btn btn-success" style="flex:1" id="btn-confirm-masuk" onclick="confirmMasuk()">Ya, Konfirmasi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ Modal Konfirmasi Keluar ══ -->
+    <div class="modal-overlay" id="modal-confirm-keluar" style="display:none"
+        onclick="if(event.target===this)closeConfirmKeluar()">
+        <div class="modal" style="max-width:400px;width:95vw">
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:12px">⚠️ Konfirmasi Barang Keluar</h3>
+            <p id="confirm-keluar-text" style="color:var(--text-secondary);margin-bottom:20px;font-size:.875rem"></p>
+            <div style="display:flex;gap:10px">
+                <button class="btn btn-secondary" style="flex:1" onclick="closeConfirmKeluar()">Batal</button>
+                <button class="btn btn-danger" style="flex:1" id="btn-confirm-keluar" onclick="confirmKeluar()">Ya, Konfirmasi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ Modal Konfirmasi Hapus ══ -->
+    <div class="modal-overlay" id="modal-confirm-hapus" style="display:none"
+        onclick="if(event.target===this)closeConfirmHapus()">
+        <div class="modal" style="max-width:400px;width:95vw">
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--accent-red)">🗑️ Konfirmasi Buang Barang</h3>
+            <p id="confirm-hapus-text" style="color:var(--text-secondary);margin-bottom:20px;font-size:.875rem"></p>
+            <div style="display:flex;gap:10px">
+                <button class="btn btn-secondary" style="flex:1" onclick="closeConfirmHapus()">Batal</button>
+                <button class="btn btn-danger" style="flex:1" id="btn-confirm-hapus" onclick="executeDeleteProduct()">Ya, Buang</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../js/dashboard.js"></script>
+    <script src="../js/admin.js"></script>
+</body>
+
+</html>
