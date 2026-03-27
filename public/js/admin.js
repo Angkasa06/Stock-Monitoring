@@ -610,14 +610,42 @@ function renderLogPagination() {
 // ──────────────────────────────────────────────────────────────
 let laporanChart = null;
 
-async function loadLaporan() {
-  const days = document.getElementById('laporan-days').value || 30;
+async function checkLoadLaporan() {
+  const startDate = document.getElementById('laporan-start-date').value;
+  const endDate = document.getElementById('laporan-end-date').value;
+  const msgEl = document.getElementById('laporan-empty-msg');
+  
+  if (!startDate || !endDate) {
+      if (msgEl) msgEl.style.display = 'inline';
+      
+      // Kosongkan chart jika sebelumnya ada
+      if (laporanChart) {
+          laporanChart.destroy();
+          laporanChart = null;
+      }
+      return;
+  }
+  
+  if (startDate > endDate) {
+      showToast('Tanggal "Dari" tidak boleh lebih besar dari "Sampai".', 'error');
+      if (laporanChart) {
+          laporanChart.destroy();
+          laporanChart = null;
+      }
+      return;
+  }
+  
+  if (msgEl) msgEl.style.display = 'none';
+  await loadLaporan(startDate, endDate);
+}
+
+async function loadLaporan(startDate, endDate) {
   try {
-    const res = await fetch(`/api/stats/report?days=${days}`, { credentials: 'include' });
+    const res = await fetch(`/api/stats/report?startDate=${startDate}&endDate=${endDate}`, { credentials: 'include' });
     const json = await res.json();
     
     if (!json.success) {
-      showToast('Gagal memuat laporan', 'error');
+      showToast(json.message || 'Gagal memuat laporan', 'error');
       return;
     }
     
@@ -706,7 +734,7 @@ function showSection(name) {
   if (name === 'daftar')        renderDaftarTable();
   if (name === 'masuk')         loadMasukLog();
   if (name === 'keluar')        loadKeluarLog();
-  if (name === 'laporan')       loadLaporan();
+  if (name === 'laporan')       checkLoadLaporan();
   if (name === 'log')           { logOffset = 0; loadLogs(); }
 }
 

@@ -58,17 +58,23 @@ router.get('/overview', verifyToken, requireRole('admin'), async (req, res) => {
 // ============================================================
 router.get('/report', verifyToken, requireRole('admin'), async (req, res) => {
     try {
-        const days = parseInt(req.query.days) || 30;
+        const startDate = req.query.startDate;
+        const endDate = req.query.endDate;
         
+        if (!startDate || !endDate) {
+            return res.status(400).json({ success: false, message: 'Harap tentukan rentang tanggal yang valid.' });
+        }
+
         const [rows] = await db.execute(`
             SELECT product_name, SUM(ABS(qty_change)) AS total_habis 
             FROM stock_logs 
             WHERE change_type = 'KELUAR' 
-              AND created_at >= DATE_SUB(NOW(), INTERVAL ${days} DAY)
+              AND DATE(created_at) >= ? 
+              AND DATE(created_at) <= ?
             GROUP BY product_name
             ORDER BY total_habis DESC
             LIMIT 15
-        `);
+        `, [startDate, endDate]);
 
         return res.json({ success: true, data: rows });
     } catch (err) {
