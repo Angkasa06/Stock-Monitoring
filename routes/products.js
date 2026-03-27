@@ -62,7 +62,7 @@ router.post('/', verifyToken, requireRole('admin'), async (req, res) => {
             const [[existing]] = await conn.execute('SELECT id FROM products WHERE sku = ?', [sku.trim()]);
             if (existing) {
                 await conn.rollback();
-                return res.status(400).json({ success: false, message: `SKU "${sku}" sudah digunakan produk lain.` });
+                return res.status(400).json({ success: false, message: `Pendaftaran barang baru gagal. SKU "${sku}" sudah pernah digunakan dan tidak boleh digunakan kembali.` });
             }
         }
 
