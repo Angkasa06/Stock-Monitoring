@@ -36,7 +36,7 @@ function changeTypeBadge(type) {
     'MASUK':      '<span class="badge badge-green">↑ MASUK</span>',
     'KELUAR':     '<span class="badge badge-red">↓ KELUAR</span>',
     'PRODUK_BARU':'<span class="badge badge-blue">★ PRODUK BARU</span>',
-    'HAPUS_PRODUK':'<span class="badge badge-red">🗑️ HAPUS</span>',
+    'HAPUS_PRODUK':'<span class="badge badge-secondary">👁️‍🗨️ HIDE</span>',
   };
   return map[type] || `<span class="badge">${type}</span>`;
 }
@@ -60,6 +60,7 @@ async function loadProducts() {
       price:    parseFloat(p.price),
       stock:    p.stock,
       minStock: p.minimum_stock,
+      isActive: p.is_active,
     }));
 
     renderAll();
@@ -82,7 +83,7 @@ function renderAll() {
 
 // ── Notif Badge ───────────────────────────────────────────────
 function updateNotifBadge(count) {
-  const c = (count !== undefined) ? count : products.filter(p => p.stock <= p.minStock).length;
+  const c = (count !== undefined) ? count : products.filter(p => p.isActive === 1 && p.stock <= p.minStock).length;
   const badge1 = document.getElementById('notif-badge');
   const badge2 = document.getElementById('header-notif-badge');
   if (c > 0) {
@@ -96,8 +97,10 @@ function updateNotifBadge(count) {
 
 // ── Notifikasi Page ───────────────────────────────────────────
 function renderNotifPage() {
-  const alerts = products.filter(p => p.stock <= p.minStock);
+  const alerts = products.filter(p => p.isActive === 1 && p.stock <= p.minStock);
+  const hiddens = products.filter(p => p.isActive === 0);
   let html = '';
+  
   if (alerts.length) {
     html += `<div class="card"><div class="card-header"><div class="card-title">⚠️ Perlu Perhatian (${alerts.length} produk)</div></div>`;
     html += alerts.map(p => {
@@ -115,14 +118,33 @@ function renderNotifPage() {
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
           <span class="badge ${isEmpty ? 'badge-red' : 'badge-amber'}">${isEmpty ? 'HABIS' : 'TIPIS'}</span>
-          ${isEmpty ? `<button class="btn btn-sm btn-danger" onclick="confirmDeleteProduct(${p.id})">🗑️ Buang</button>` : ''}
+          ${isEmpty ? `<button class="btn btn-sm btn-danger" onclick="confirmDeleteProduct(${p.id})">👁️‍🗨️ Hide</button>` : ''}
         </div>
       </div>`;
     }).join('');
     html += '</div>';
   } else {
-    html = '<div class="alert alert-success">✅ Semua stok dalam kondisi aman! Tidak ada peringatan.</div>';
+    html += '<div class="alert alert-success">✅ Semua stok reguler dalam kondisi aman! Tidak ada peringatan.</div>';
   }
+
+  if (hiddens.length) {
+    html += `<div class="card" style="margin-top: 20px;"><div class="card-header"><div class="card-title">👁️‍🗨️ Barang Tersembunyi (${hiddens.length} produk)</div></div>`;
+    html += hiddens.map(p => {
+      return `<div class="notif-item" style="opacity: 0.85;">
+        <div class="notif-icon" style="background:var(--bg-secondary);color:var(--text-muted)">${p.icon}</div>
+        <div style="flex:1">
+          <div class="notif-title" style="color:var(--text-secondary)">${p.name} <span style="font-size:.72rem;color:var(--text-muted)">(SKU: ${p.sku || '-'})</span></div>
+          <div class="notif-detail">Stok Terakhir: <strong>${p.stock} ${p.unit}</strong></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <span class="badge" style="background:var(--bg-secondary);color:var(--text-secondary)">HIDDEN</span>
+          <button class="btn btn-sm" style="background:var(--accent-green);color:white;border:none;" onclick="unhideProduct(${p.id})">Aktifkan Kembali</button>
+        </div>
+      </div>`;
+    }).join('');
+    html += '</div>';
+  }
+
   document.getElementById('notif-content').innerHTML = html;
 }
 
@@ -133,6 +155,7 @@ function renderDaftarTable() {
   const q   = (document.getElementById('daftar-search')?.value || '').toLowerCase();
   const cat = document.getElementById('daftar-category')?.value || '';
   const list = products.filter(p =>
+    p.isActive === 1 &&
     (!q   || p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)) &&
     (!cat || p.category === cat)
   );
@@ -168,7 +191,7 @@ function filterDaftar() { renderDaftarTable(); }
 // ──────────────────────────────────────────────────────────────
 function populateDropdowns() {
   const opts = '<option value="">-- Pilih Barang --</option>' +
-    products.map(p => `<option value="${p.id}">${p.icon} ${p.name} (Stok: ${p.stock} ${p.unit})</option>`).join('');
+    products.filter(p => p.isActive === 1).map(p => `<option value="${p.id}">${p.icon} ${p.name} (Stok: ${p.stock} ${p.unit})</option>`).join('');
   document.getElementById('masuk-product-id').innerHTML  = opts;
   document.getElementById('keluar-product-id').innerHTML = opts;
 }
@@ -497,7 +520,7 @@ async function saveEdit() {
 }
 
 // ──────────────────────────────────────────────────────────────
-// HAPUS PRODUK
+// HAPUS / HIDE PRODUK
 // ──────────────────────────────────────────────────────────────
 let pendingHapusId = null;
 
@@ -507,7 +530,7 @@ function confirmDeleteProduct(id) {
   
   pendingHapusId = id;
   document.getElementById('confirm-hapus-text').innerHTML = 
-    `Apakah Anda yakin ingin membuang produk <strong>${p.name}</strong>?<br>Sistem hanya akan menyembunyikannya (tidak aktif / soft delete) sehingga riwayat laporannya tetap valid di daftar log.`;
+    `Apakah Anda yakin ingin menyembunyikan produk <strong>${p.name}</strong>?<br>Sistem hanya akan menyembunyikannya (hide) sehingga riwayat laporannya tetap valid di daftar log.`;
   document.getElementById('modal-confirm-hapus').style.display = 'flex';
 }
 
@@ -521,7 +544,7 @@ async function executeDeleteProduct() {
   
   const btn = document.getElementById('btn-confirm-hapus');
   btn.disabled = true; 
-  btn.textContent = 'Membuang...';
+  btn.textContent = 'Menyembunyikan...';
 
   try {
     const res = await fetch(`/api/products/${pendingHapusId}`, {
@@ -534,7 +557,7 @@ async function executeDeleteProduct() {
       showToast(json.message, 'error');
       return;
     }
-    showToast('✅ Berhasil membuang barang dari sistem', 'success');
+    showToast('✅ Berhasil menyembunyikan barang dari sistem', 'success');
     closeConfirmHapus();
     await loadProducts();
     await loadLogs();
@@ -542,7 +565,27 @@ async function executeDeleteProduct() {
     showToast('Gagal terhubung ke server.', 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Ya, Buang';
+    btn.textContent = 'Ya, Sembunyikan';
+  }
+}
+
+async function unhideProduct(id) {
+  try {
+    const res = await fetch(`/api/products/${id}/unhide`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
+    });
+    const json = await res.json();
+    if (!json.success) {
+      showToast(json.message, 'error');
+      return;
+    }
+    showToast('✅ Barang berhasil diaktifkan kembali.', 'success');
+    await loadProducts();
+    await loadLogs();
+  } catch (err) {
+    showToast('Gagal terhubung ke server.', 'error');
   }
 }
 

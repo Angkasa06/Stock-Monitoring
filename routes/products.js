@@ -25,7 +25,6 @@ router.get('/', verifyToken, requireRole('admin'), async (req, res) => {
         const [rows] = await db.execute(
             `SELECT id, name, sku, category, unit, price, stock, minimum_stock, is_active, created_at, updated_at
              FROM products
-             WHERE is_active = 1
              ORDER BY category, name`
         );
         return res.json({ success: true, data: rows });
@@ -76,16 +75,16 @@ router.post('/', verifyToken, requireRole('admin'), async (req, res) => {
         // Catat ke stock_logs sebagai PRODUK_BARU
         await logStockChange(conn, {
             productId,
-            productName:  name.trim(),
-            productSku:   sku?.trim() || null,
-            userId:       req.user.id,
-            username:     req.user.username,
-            changeType:   'PRODUK_BARU',
-            qtyChange:    initialStock,
-            stockBefore:  0,
-            stockAfter:   initialStock,
-            note:         `Produk baru didaftarkan. Stok awal: ${initialStock} ${unitVal}.`,
-            ipAddress:    req.ip,
+            productName: name.trim(),
+            productSku: sku?.trim() || null,
+            userId: req.user.id,
+            username: req.user.username,
+            changeType: 'PRODUK_BARU',
+            qtyChange: initialStock,
+            stockBefore: 0,
+            stockAfter: initialStock,
+            note: `Produk baru didaftarkan. Stok awal: ${initialStock} ${unitVal}.`,
+            ipAddress: req.ip,
         });
 
         await conn.commit();
@@ -109,7 +108,7 @@ router.post('/', verifyToken, requireRole('admin'), async (req, res) => {
 // ============================================================
 router.patch('/:id/restock', verifyToken, requireRole('admin'), async (req, res) => {
     const productId = parseInt(req.params.id);
-    const qty  = parseInt(req.body.qty);
+    const qty = parseInt(req.body.qty);
     const note = req.body.note || '';
 
     if (!qty || qty < 1) {
@@ -130,7 +129,7 @@ router.patch('/:id/restock', verifyToken, requireRole('admin'), async (req, res)
         }
 
         const stockBefore = product.stock;
-        const stockAfter  = stockBefore + qty;
+        const stockAfter = stockBefore + qty;
 
         await conn.execute(
             'UPDATE products SET stock = ?, updated_at = NOW() WHERE id = ?',
@@ -139,16 +138,16 @@ router.patch('/:id/restock', verifyToken, requireRole('admin'), async (req, res)
 
         await logStockChange(conn, {
             productId,
-            productName:  product.name,
-            productSku:   product.sku,
-            userId:       req.user.id,
-            username:     req.user.username,
-            changeType:   'MASUK',
-            qtyChange:    qty,
+            productName: product.name,
+            productSku: product.sku,
+            userId: req.user.id,
+            username: req.user.username,
+            changeType: 'MASUK',
+            qtyChange: qty,
             stockBefore,
             stockAfter,
-            note:         note || null,
-            ipAddress:    req.ip,
+            note: note || null,
+            ipAddress: req.ip,
         });
 
         await conn.commit();
@@ -172,7 +171,7 @@ router.patch('/:id/restock', verifyToken, requireRole('admin'), async (req, res)
 // ============================================================
 router.patch('/:id/reduce', verifyToken, requireRole('admin'), async (req, res) => {
     const productId = parseInt(req.params.id);
-    const qty  = parseInt(req.body.qty);
+    const qty = parseInt(req.body.qty);
     const note = req.body.note || '';
 
     if (!qty || qty < 1) {
@@ -201,7 +200,7 @@ router.patch('/:id/reduce', verifyToken, requireRole('admin'), async (req, res) 
         }
 
         const stockBefore = product.stock;
-        const stockAfter  = stockBefore - qty;
+        const stockAfter = stockBefore - qty;
 
         await conn.execute(
             'UPDATE products SET stock = ?, updated_at = NOW() WHERE id = ?',
@@ -210,16 +209,16 @@ router.patch('/:id/reduce', verifyToken, requireRole('admin'), async (req, res) 
 
         await logStockChange(conn, {
             productId,
-            productName:  product.name,
-            productSku:   product.sku,
-            userId:       req.user.id,
-            username:     req.user.username,
-            changeType:   'KELUAR',
-            qtyChange:    -qty,
+            productName: product.name,
+            productSku: product.sku,
+            userId: req.user.id,
+            username: req.user.username,
+            changeType: 'KELUAR',
+            qtyChange: -qty,
             stockBefore,
             stockAfter,
-            note:         note || null,
-            ipAddress:    req.ip,
+            note: note || null,
+            ipAddress: req.ip,
         });
 
         await conn.commit();
@@ -259,8 +258,8 @@ router.patch('/:id', verifyToken, requireRole('admin'), async (req, res) => {
             return res.status(404).json({ success: false, message: 'Produk tidak ditemukan.' });
         }
 
-        const newName     = (name && name.trim())          ? name.trim()           : product.name;
-        const newPrice    = (price !== undefined && price >= 0) ? parseFloat(price) : parseFloat(product.price);
+        const newName = (name && name.trim()) ? name.trim() : product.name;
+        const newPrice = (price !== undefined && price >= 0) ? parseFloat(price) : parseFloat(product.price);
         const newMinStock = (minimum_stock !== undefined && minimum_stock >= 1) ? parseInt(minimum_stock) : product.minimum_stock;
 
         await conn.execute(
@@ -304,7 +303,7 @@ router.delete('/:id', verifyToken, requireRole('admin'), async (req, res) => {
 
         if (product.stock > 0) {
             await conn.rollback();
-            return res.status(400).json({ success: false, message: 'Produk tidak dapat dihapus karena stok masih ada.' });
+            return res.status(400).json({ success: false, message: 'Produk tidak dapat disembunyikan karena stok masih ada.' });
         }
 
         await conn.execute(
@@ -314,24 +313,78 @@ router.delete('/:id', verifyToken, requireRole('admin'), async (req, res) => {
 
         await logStockChange(conn, {
             productId,
-            productName:  product.name,
-            productSku:   product.sku,
-            userId:       req.user.id,
-            username:     req.user.username,
-            changeType:   'HAPUS_PRODUK',
-            qtyChange:    0,
-            stockBefore:  0,
-            stockAfter:   0,
-            note:         'Produk dihapus dari sistem (is_active = 0).',
-            ipAddress:    req.ip,
+            productName: product.name,
+            productSku: product.sku,
+            userId: req.user.id,
+            username: req.user.username,
+            changeType: 'HAPUS_PRODUK',
+            qtyChange: 0,
+            stockBefore: 0,
+            stockAfter: 0,
+            note: 'Produk disembunyikan dari sistem (is_active = 0).',
+            ipAddress: req.ip,
         });
 
         await conn.commit();
-        return res.json({ success: true, message: `Produk "${product.name}" berhasil dihapus dari sistem.` });
+        return res.json({ success: true, message: `Produk "${product.name}" berhasil disembunyikan dari sistem.` });
     } catch (err) {
         await conn.rollback();
         console.error('Error DELETE /api/products/:id:', err);
-        return res.status(500).json({ success: false, message: 'Gagal menghapus produk.' });
+        return res.status(500).json({ success: false, message: 'Gagal menyembunyikan produk.' });
+    } finally {
+        conn.release();
+    }
+});
+
+// ============================================================
+// PATCH /api/products/:id/unhide — Mengaktifkan kembali produk
+// ============================================================
+router.patch('/:id/unhide', verifyToken, requireRole('admin'), async (req, res) => {
+    const productId = parseInt(req.params.id);
+
+    const conn = await db.getConnection();
+    try {
+        await conn.beginTransaction();
+
+        const [[product]] = await conn.execute(
+            'SELECT id, name, is_active FROM products WHERE id = ? FOR UPDATE',
+            [productId]
+        );
+        if (!product) {
+            await conn.rollback();
+            return res.status(404).json({ success: false, message: 'Produk tidak ditemukan.' });
+        }
+
+        if (product.is_active === 1) {
+            await conn.rollback();
+            return res.status(400).json({ success: false, message: 'Produk sudah dalam keadaan aktif.' });
+        }
+
+        await conn.execute(
+            'UPDATE products SET is_active = 1, updated_at = NOW() WHERE id = ?',
+            [productId]
+        );
+
+        await logStockChange(conn, {
+            productId,
+            productName: product.name,
+            productSku: product.sku,
+            userId: req.user.id,
+            username: req.user.username,
+            changeType: 'PRODUK_BARU',
+            qtyChange: 0,
+            stockBefore: 0,
+            stockAfter: 0,
+            note: 'Produk diaktifkan kembali / di-unhide (is_active = 1).',
+            ipAddress: req.ip,
+        });
+
+        await conn.commit();
+        return res.json({ success: true, message: `Produk "${product.name}" berhasil diaktifkan kembali.` });
+    } catch (err) {
+        await conn.rollback();
+        console.error('Error PATCH /api/products/:id/unhide:', err);
+        return res.status(500).json({ success: false, message: 'Gagal mengaktifkan kembali produk.' });
     } finally {
         conn.release();
     }
@@ -343,7 +396,7 @@ router.delete('/:id', verifyToken, requireRole('admin'), async (req, res) => {
 // ============================================================
 router.get('/logs', verifyToken, requireRole('admin'), async (req, res) => {
     try {
-        const limit  = Math.min(parseInt(req.query.limit)  || 100, 500);
+        const limit = Math.min(parseInt(req.query.limit) || 100, 500);
         const offset = parseInt(req.query.offset) || 0;
 
         const [rows] = await db.execute(

@@ -670,17 +670,16 @@
         </div>
     </div>
 
-    <!-- ══ Modal Konfirmasi Hapus ══ -->
+    <!-- ══ Modal Konfirmasi Hide ══ -->
     <div class="modal-overlay" id="modal-confirm-hapus" style="display:none"
         onclick="if(event.target===this)closeConfirmHapus()">
         <div class="modal" style="max-width:400px;width:95vw">
-            <h3 style="font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--accent-red)">🗑️ Konfirmasi Buang
-                Barang</h3>
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--text-secondary)">👁️‍🗨️ Konfirmasi Sembunyikan Barang</h3>
             <p id="confirm-hapus-text" style="color:var(--text-secondary);margin-bottom:20px;font-size:.875rem"></p>
             <div style="display:flex;gap:10px">
                 <button class="btn btn-secondary" style="flex:1" onclick="closeConfirmHapus()">Batal</button>
                 <button class="btn btn-danger" style="flex:1" id="btn-confirm-hapus"
-                    onclick="executeDeleteProduct()">Ya, Buang</button>
+                    onclick="executeDeleteProduct()">Ya, Sembunyikan</button>
             </div>
         </div>
     </div>
