@@ -12,7 +12,7 @@ document.getElementById('welcome-name').textContent = session?.name || 'Admin';
 
 // ── State Global ──────────────────────────────────────────────
 let products = [];
-let logData  = [];
+let logData = [];
 let logTotal = 0;
 const LOG_PAGE_SIZE = 50;
 let logOffset = 0;
@@ -25,20 +25,39 @@ function getCategoryIcon(cat) {
 
 // ── Helper: badge status stok ─────────────────────────────────
 function stockBadge(p) {
-  if (p.stock <= 0)           return '<span class="badge badge-red">Habis</span>';
-  if (p.stock <= p.minStock)  return '<span class="badge badge-amber">Tipis</span>';
+  if (p.stock <= 0) return '<span class="badge badge-red">Habis</span>';
+  if (p.stock <= p.minStock) return '<span class="badge badge-amber">Tipis</span>';
   return '<span class="badge badge-green">OK</span>';
 }
 
 // ── Helper: badge jenis log ───────────────────────────────────
 function changeTypeBadge(type) {
   const map = {
-    'MASUK':      '<span class="badge badge-green">↑ MASUK</span>',
-    'KELUAR':     '<span class="badge badge-red">↓ KELUAR</span>',
-    'PRODUK_BARU':'<span class="badge badge-blue">★ PRODUK BARU</span>',
-    'HAPUS_PRODUK':'<span class="badge badge-secondary">👁️‍🗨️ HIDE</span>',
+    'MASUK': '<span class="badge badge-green">↑ MASUK</span>',
+    'KELUAR': '<span class="badge badge-red">↓ KELUAR</span>',
+    'PRODUK_BARU': '<span class="badge badge-blue">★ PRODUK BARU</span>',
+    'HAPUS_PRODUK': '<span class="badge badge-secondary">👁️‍🗨️ HIDE</span>',
   };
   return map[type] || `<span class="badge">${type}</span>`;
+}
+
+// ── Helper: SKU Prefix ────────────────────────────────────────
+function getCategoryPrefix(cat) {
+  if (!cat) return '-';
+  const map = {
+    'Makanan': 'MKN',
+    'Minuman': 'MNM',
+    'Kebersihan': 'KBR',
+    'Elektronik': 'ELT',
+    'Lainnya': 'LYN'
+  };
+  return map[cat] || '-';
+}
+
+function updateSkuPrefix() {
+  const cat = document.getElementById('new-category').value;
+  const prefix = cat ? getCategoryPrefix(cat) + '-' : '-';
+  document.getElementById('sku-prefix-display').textContent = prefix;
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -46,19 +65,19 @@ function changeTypeBadge(type) {
 // ──────────────────────────────────────────────────────────────
 async function loadProducts() {
   try {
-    const res  = await fetch('/api/products', { credentials: 'include' });
+    const res = await fetch('/api/products', { credentials: 'include' });
     const json = await res.json();
     if (!json.success) throw new Error(json.message);
 
     products = json.data.map(p => ({
-      id:       p.id,
-      name:     p.name,
-      sku:      p.sku || '',
+      id: p.id,
+      name: p.name,
+      sku: p.sku || '',
       category: p.category || 'Lainnya',
-      icon:     getCategoryIcon(p.category),
-      unit:     p.unit || 'pcs',
-      price:    parseFloat(p.price),
-      stock:    p.stock,
+      icon: getCategoryIcon(p.category),
+      unit: p.unit || 'pcs',
+      price: parseFloat(p.price),
+      stock: p.stock,
       minStock: p.minimum_stock,
       isActive: p.is_active,
     }));
@@ -100,7 +119,7 @@ function renderNotifPage() {
   const alerts = products.filter(p => p.isActive === 1 && p.stock <= p.minStock);
   const hiddens = products.filter(p => p.isActive === 0);
   let html = '';
-  
+
   if (alerts.length) {
     html += `<div class="card"><div class="card-header"><div class="card-title">⚠️ Perlu Perhatian (${alerts.length} produk)</div></div>`;
     html += alerts.map(p => {
@@ -152,11 +171,11 @@ function renderNotifPage() {
 // DAFTAR TABLE (dengan search & filter)
 // ──────────────────────────────────────────────────────────────
 function renderDaftarTable() {
-  const q   = (document.getElementById('daftar-search')?.value || '').toLowerCase();
+  const q = (document.getElementById('daftar-search')?.value || '').toLowerCase();
   const cat = document.getElementById('daftar-category')?.value || '';
   const list = products.filter(p =>
     p.isActive === 1 &&
-    (!q   || p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)) &&
+    (!q || p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)) &&
     (!cat || p.category === cat)
   );
 
@@ -192,12 +211,12 @@ function filterDaftar() { renderDaftarTable(); }
 function populateDropdowns() {
   const opts = '<option value="">-- Pilih Barang --</option>' +
     products.filter(p => p.isActive === 1).map(p => `<option value="${p.id}">${p.icon} ${p.name} (Stok: ${p.stock} ${p.unit})</option>`).join('');
-  document.getElementById('masuk-product-id').innerHTML  = opts;
+  document.getElementById('masuk-product-id').innerHTML = opts;
   document.getElementById('keluar-product-id').innerHTML = opts;
 }
 
 function fillMasukInfo() {
-  const id  = parseInt(document.getElementById('masuk-product-id').value);
+  const id = parseInt(document.getElementById('masuk-product-id').value);
   const wrap = document.getElementById('masuk-info-wrap');
   if (!id) { wrap.style.display = 'none'; return; }
   const p = products.find(x => x.id === id);
@@ -218,11 +237,11 @@ function fillMasukInfo() {
 let pendingMasuk = null;
 
 function processMasuk() {
-  const id  = parseInt(document.getElementById('masuk-product-id').value);
+  const id = parseInt(document.getElementById('masuk-product-id').value);
   const qty = parseInt(document.getElementById('masuk-qty').value);
   const note = document.getElementById('masuk-note').value || '';
 
-  if (!id)        { showToast('Pilih barang terlebih dahulu!', 'error'); return; }
+  if (!id) { showToast('Pilih barang terlebih dahulu!', 'error'); return; }
   if (!qty || qty < 1) { showToast('Jumlah minimal 1!', 'error'); return; }
 
   const p = products.find(x => x.id === id);
@@ -244,7 +263,7 @@ async function confirmMasuk() {
   btn.disabled = true; btn.textContent = 'Menyimpan...';
 
   try {
-    const res  = await fetch(`/api/products/${id}/restock`, {
+    const res = await fetch(`/api/products/${id}/restock`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -282,7 +301,7 @@ function quickMasuk(id) {
 
 async function loadMasukLog() {
   try {
-    const res  = await fetch('/api/products/logs?limit=100', { credentials: 'include' });
+    const res = await fetch('/api/products/logs?limit=100', { credentials: 'include' });
     const json = await res.json();
     if (!json.success) return;
 
@@ -314,7 +333,7 @@ async function loadMasukLog() {
 let pendingKeluar = null;
 
 function fillKeluarInfo() {
-  const id  = parseInt(document.getElementById('keluar-product-id').value);
+  const id = parseInt(document.getElementById('keluar-product-id').value);
   const wrap = document.getElementById('keluar-info-wrap');
   if (!id) { wrap.style.display = 'none'; return; }
   const p = products.find(x => x.id === id);
@@ -332,11 +351,11 @@ function fillKeluarInfo() {
 }
 
 function processKeluar() {
-  const id  = parseInt(document.getElementById('keluar-product-id').value);
+  const id = parseInt(document.getElementById('keluar-product-id').value);
   const qty = parseInt(document.getElementById('keluar-qty').value);
   const note = document.getElementById('keluar-note').value || '';
 
-  if (!id)        { showToast('Pilih barang terlebih dahulu!', 'error'); return; }
+  if (!id) { showToast('Pilih barang terlebih dahulu!', 'error'); return; }
   if (!qty || qty < 1) { showToast('Jumlah minimal 1!', 'error'); return; }
 
   const p = products.find(x => x.id === id);
@@ -365,7 +384,7 @@ async function confirmKeluar() {
   btn.disabled = true; btn.textContent = 'Menyimpan...';
 
   try {
-    const res  = await fetch(`/api/products/${id}/reduce`, {
+    const res = await fetch(`/api/products/${id}/reduce`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -403,7 +422,7 @@ function quickKeluar(id) {
 
 async function loadKeluarLog() {
   try {
-    const res  = await fetch('/api/products/logs?limit=100', { credentials: 'include' });
+    const res = await fetch('/api/products/logs?limit=100', { credentials: 'include' });
     const json = await res.json();
     if (!json.success) return;
 
@@ -433,15 +452,19 @@ async function loadKeluarLog() {
 // TAMBAH PRODUK BARU
 // ──────────────────────────────────────────────────────────────
 async function addNewProduct() {
-  const name     = document.getElementById('new-name').value.trim();
-  const sku      = document.getElementById('new-sku').value.trim();
+  const name = document.getElementById('new-name').value.trim();
   const category = document.getElementById('new-category').value;
-  const unit     = document.getElementById('new-unit').value.trim() || 'pcs';
-  const price    = parseFloat(document.getElementById('new-price').value);
-  const stock    = parseInt(document.getElementById('new-stock').value) || 0;
+  const unit = document.getElementById('new-unit').value.trim() || 'pcs';
+  const price = parseFloat(document.getElementById('new-price').value);
+  const stock = parseInt(document.getElementById('new-stock').value) || 0;
   const minStock = parseInt(document.getElementById('new-min-stock').value) || 10;
 
-  if (!name)      { showToast('Nama produk wajib diisi!', 'error'); return; }
+  const prefix = document.getElementById('sku-prefix-display').textContent;
+  const num = document.getElementById('new-sku-number').value.trim();
+  const sku = (prefix !== '-' && num) ? prefix + num : '';
+
+  if (!name) { showToast('Nama produk wajib diisi!', 'error'); return; }
+  if (!category) { showToast('Kategori wajib dipilih!', 'error'); return; }
   if (!price || price < 0) { showToast('Harga harus diisi dan valid!', 'error'); return; }
 
   const btn = document.getElementById('btn-add-product');
@@ -468,12 +491,15 @@ async function addNewProduct() {
 }
 
 function resetNewProductForm() {
-  ['new-name','new-sku','new-price','new-stock'].forEach(id => {
+  ['new-name', 'new-price', 'new-stock'].forEach(id => {
     document.getElementById(id).value = '';
   });
-  document.getElementById('new-unit').value     = 'pcs';
+  document.getElementById('new-unit').value = 'pcs';
   document.getElementById('new-min-stock').value = '10';
-  document.getElementById('new-category').value  = 'Makanan';
+  document.getElementById('new-category').value = '';
+  
+  document.getElementById('new-sku-number').value = '';
+  updateSkuPrefix();
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -482,18 +508,18 @@ function resetNewProductForm() {
 function openEditModal(id) {
   const p = products.find(x => x.id === id);
   if (!p) return;
-  document.getElementById('edit-id').value        = id;
-  document.getElementById('edit-name').value      = p.name;
-  document.getElementById('edit-price').value     = p.price;
+  document.getElementById('edit-id').value = id;
+  document.getElementById('edit-name').value = p.name;
+  document.getElementById('edit-price').value = p.price;
   document.getElementById('edit-min-stock').value = p.minStock;
   document.getElementById('modal-edit').style.display = 'flex';
 }
 function closeEditModal() { document.getElementById('modal-edit').style.display = 'none'; }
 
 async function saveEdit() {
-  const id       = parseInt(document.getElementById('edit-id').value);
-  const name     = document.getElementById('edit-name').value.trim();
-  const price    = parseFloat(document.getElementById('edit-price').value);
+  const id = parseInt(document.getElementById('edit-id').value);
+  const name = document.getElementById('edit-name').value.trim();
+  const price = parseFloat(document.getElementById('edit-price').value);
   const minStock = parseInt(document.getElementById('edit-min-stock').value);
 
   const btn = document.getElementById('btn-save-edit');
@@ -527,9 +553,9 @@ let pendingHapusId = null;
 function confirmDeleteProduct(id) {
   const p = products.find(x => x.id === id);
   if (!p) return;
-  
+
   pendingHapusId = id;
-  document.getElementById('confirm-hapus-text').innerHTML = 
+  document.getElementById('confirm-hapus-text').innerHTML =
     `Apakah Anda yakin ingin menyembunyikan produk <strong>${p.name}</strong>?<br>Sistem hanya akan menyembunyikannya (hide) sehingga riwayat laporannya tetap valid di daftar log.`;
   document.getElementById('modal-confirm-hapus').style.display = 'flex';
 }
@@ -541,9 +567,9 @@ function closeConfirmHapus() {
 
 async function executeDeleteProduct() {
   if (!pendingHapusId) return;
-  
+
   const btn = document.getElementById('btn-confirm-hapus');
-  btn.disabled = true; 
+  btn.disabled = true;
   btn.textContent = 'Menyembunyikan...';
 
   try {
@@ -569,24 +595,30 @@ async function executeDeleteProduct() {
   }
 }
 
-async function unhideProduct(id) {
-  try {
-    const res = await fetch(`/api/products/${id}/unhide`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include'
-    });
-    const json = await res.json();
-    if (!json.success) {
-      showToast(json.message, 'error');
-      return;
-    }
-    showToast('✅ Barang berhasil diaktifkan kembali.', 'success');
-    await loadProducts();
-    await loadLogs();
-  } catch (err) {
-    showToast('Gagal terhubung ke server.', 'error');
+function unhideProduct(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  
+  // Arahkan ke tab Daftarkan Produk Baru
+  showSection('tambah-produk');
+  
+  // Pre-fill data dari produk yang tersembunyi
+  document.getElementById('new-name').value = p.name;
+  document.getElementById('new-unit').value = p.unit || 'pcs';
+  if (p.category) {
+    document.getElementById('new-category').value = p.category;
   }
+  document.getElementById('new-price').value = p.price;
+  document.getElementById('new-min-stock').value = p.minStock;
+  
+  // Kosongkan field SKU (akan diset prefixnya) dan Stok Awal
+  document.getElementById('new-sku-number').value = '';
+  updateSkuPrefix();
+  document.getElementById('new-stock').value = '0';
+  
+  // Beri fokus ke field nama dan beri info
+  document.getElementById('new-name').focus();
+  showToast('Silakan lengkapi data produk baru untuk mengaktifkan kembali.', 'info');
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -599,11 +631,11 @@ async function loadLogs() {
 
   try {
     const url = `/api/products/logs?limit=${LOG_PAGE_SIZE}&offset=${logOffset}`;
-    const res  = await fetch(url, { credentials: 'include' });
+    const res = await fetch(url, { credentials: 'include' });
     const json = await res.json();
     if (!json.success) throw new Error(json.message);
 
-    logData  = filterType ? json.data.filter(r => r.change_type === filterType) : json.data;
+    logData = filterType ? json.data.filter(r => r.change_type === filterType) : json.data;
     logTotal = json.total;
 
     if (!logData.length) {
@@ -623,7 +655,7 @@ async function loadLogs() {
         </td>
         <td>${r.stock_before}</td>
         <td style="font-weight:700">${r.stock_after}</td>
-        <td style="color:var(--text-muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.note||''}">${r.note || '-'}</td>
+        <td style="color:var(--text-muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.note || ''}">${r.note || '-'}</td>
         <td style="font-family:monospace;font-size:.74rem">${r.username}</td>
       </tr>`).join('');
 
@@ -649,103 +681,87 @@ function renderLogPagination() {
 }
 
 // ──────────────────────────────────────────────────────────────
-// CEK LAPORAN CHART
+// CEK LAPORAN LIST
 // ──────────────────────────────────────────────────────────────
-let laporanChart = null;
 
 async function checkLoadLaporan() {
   const startDate = document.getElementById('laporan-start-date').value;
   const endDate = document.getElementById('laporan-end-date').value;
   const msgEl = document.getElementById('laporan-empty-msg');
-  
+  const listContainer = document.getElementById('laporanList');
+
   if (!startDate || !endDate) {
-      if (msgEl) msgEl.style.display = 'inline';
-      
-      // Kosongkan chart jika sebelumnya ada
-      if (laporanChart) {
-          laporanChart.destroy();
-          laporanChart = null;
-      }
-      return;
+    if (msgEl) msgEl.style.display = 'inline';
+    if (listContainer) {
+      listContainer.innerHTML = '<li style="text-align:center; padding: 30px; color: var(--text-muted);">Silakan pilih rentang tanggal untuk melihat laporan.</li>';
+    }
+    return;
   }
-  
+
   if (startDate > endDate) {
-      showToast('Tanggal "Dari" tidak boleh lebih besar dari "Sampai".', 'error');
-      if (laporanChart) {
-          laporanChart.destroy();
-          laporanChart = null;
-      }
-      return;
+    showToast('Tanggal "Dari" tidak boleh lebih besar dari "Sampai".', 'error');
+    if (listContainer) {
+      listContainer.innerHTML = '<li style="text-align:center; padding: 30px; color: var(--accent-red);">Rentang tanggal tidak valid.</li>';
+    }
+    return;
   }
-  
+
   if (msgEl) msgEl.style.display = 'none';
   await loadLaporan(startDate, endDate);
 }
 
 async function loadLaporan(startDate, endDate) {
+  const listContainer = document.getElementById('laporanList');
+  if (!listContainer) return;
+
+  listContainer.innerHTML = '<li style="text-align:center; padding: 30px; color: var(--text-muted);">Memuat data laporan...</li>';
+
   try {
     const res = await fetch(`/api/stats/report?startDate=${startDate}&endDate=${endDate}`, { credentials: 'include' });
     const json = await res.json();
-    
+
     if (!json.success) {
       showToast(json.message || 'Gagal memuat laporan', 'error');
+      listContainer.innerHTML = `<li style="text-align:center; padding: 30px; color: var(--accent-red);">Gagal memuat data laporan: ${json.message}</li>`;
       return;
     }
-    
-    const labels = json.data.map(item => item.product_name);
-    const data = json.data.map(item => Number(item.total_habis));
-    
-    const ctx = document.getElementById('laporanChart');
-    if (!ctx) return;
 
-    if (laporanChart) {
-      laporanChart.destroy();
+    if (!json.data || json.data.length === 0) {
+      listContainer.innerHTML = '<li style="text-align:center; padding: 30px; color: var(--text-muted);">Tidak ada data barang keluar pada rentang tanggal tersebut.</li>';
+      return;
     }
-    
-    laporanChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: 'Jumlah Barang Keluar/Habis',
-          data: data,
-          backgroundColor: 'hsla(0, 72%, 58%, 0.85)',
-          borderColor: 'hsla(0, 72%, 58%, 1)',
-          borderWidth: 1,
-          borderRadius: 4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                return `Total Keluar: ${context.parsed.y} unit`;
-              }
-            }
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { precision: 0 }
-          }
-        }
-      }
+
+    let html = '';
+    json.data.forEach((item, index) => {
+      html += `
+        <li style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--bg-secondary); color: var(--text-secondary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem;">
+                    ${index + 1}
+                </div>
+                <div>
+                    <div style="font-weight: 600; font-size: 1rem;">${item.product_name}</div>
+                </div>
+            </div>
+            <div style="font-weight: 700; color: var(--accent-red); font-size: 1rem; background: hsla(0, 72%, 58%, 0.1); padding: 5px 12px; border-radius: 20px;">
+                ↓ ${item.total_habis} unit
+            </div>
+        </li>
+      `;
     });
 
+    listContainer.innerHTML = html;
+
   } catch (err) {
-    showToast('Gagal memuat chart', 'error');
+    showToast('Gagal memuat data laporan', 'error');
+    listContainer.innerHTML = '<li style="text-align:center; padding: 30px; color: var(--accent-red);">Terjadi kesalahan jaringan saat memuat data laporan.</li>';
   }
 }
 
 // ──────────────────────────────────────────────────────────────
 // NAVIGASI SECTION
 // ──────────────────────────────────────────────────────────────
-const SECTIONS = ['notifikasi','daftar','masuk','keluar','tambah-produk','laporan','log'];
+const SECTIONS = ['notifikasi', 'daftar', 'masuk', 'keluar', 'tambah-produk', 'laporan', 'log'];
 
 function setActiveNav(name) {
   SECTIONS.forEach(s => {
@@ -762,23 +778,24 @@ function showSection(name) {
   setActiveNav(name);
 
   const titles = {
-    'notifikasi':    'Notifikasi Stok',
-    'daftar':        'Daftar Barang',
-    'masuk':         'Barang Masuk',
-    'keluar':        'Barang Keluar',
+    'notifikasi': 'Notifikasi Stok',
+    'daftar': 'Daftar Barang',
+    'masuk': 'Barang Masuk',
+    'keluar': 'Barang Keluar',
     'tambah-produk': 'Daftarkan Produk Baru',
-    'laporan':       'Cek Laporan',
-    'log':           'Log Sistem',
+    'laporan': 'Cek Laporan',
+    'log': 'Log Sistem',
   };
   document.getElementById('page-title').textContent = titles[name] || name;
 
+  if (name === 'tambah-produk') resetNewProductForm();
   // Side effects saat membuka section
-  if (name === 'notifikasi')    renderNotifPage();
-  if (name === 'daftar')        renderDaftarTable();
-  if (name === 'masuk')         loadMasukLog();
-  if (name === 'keluar')        loadKeluarLog();
-  if (name === 'laporan')       checkLoadLaporan();
-  if (name === 'log')           { logOffset = 0; loadLogs(); }
+  if (name === 'notifikasi') renderNotifPage();
+  if (name === 'daftar') renderDaftarTable();
+  if (name === 'masuk') loadMasukLog();
+  if (name === 'keluar') loadKeluarLog();
+  if (name === 'laporan') checkLoadLaporan();
+  if (name === 'log') { logOffset = 0; loadLogs(); }
 }
 
 // ──────────────────────────────────────────────────────────────

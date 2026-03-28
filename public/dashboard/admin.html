@@ -449,11 +449,20 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label">SKU</label>
-                                <input type="text" class="form-control" id="new-sku" placeholder="MKN-006" />
+                                <div
+                                    style="display: flex; align-items: stretch; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); overflow: hidden;">
+                                    <div id="sku-prefix-display"
+                                        style="padding: 10px 12px; background: var(--bg-secondary); color: var(--text-secondary); border-right: 1px solid var(--border); font-weight: 600; font-family: monospace;">
+                                        -</div>
+                                    <input type="text" class="form-control" id="new-sku-number" placeholder="006"
+                                        style="border: none; border-radius: 0; outline: none; box-shadow: none; flex: 1;"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Kategori *</label>
-                                <select class="form-control" id="new-category">
+                                <select class="form-control" id="new-category" onchange="updateSkuPrefix()">
+                                    <option value="" disabled selected>-- Pilih Kategori --</option>
                                     <option value="Makanan">Makanan</option>
                                     <option value="Minuman">Minuman</option>
                                     <option value="Kebersihan">Kebersihan</option>
@@ -533,8 +542,13 @@
                 <div class="card" style="padding: 20px;">
                     <h3 style="margin-bottom: 20px; font-weight: 600; font-size: 1.1rem; text-align: center;">
                         Laporan Barang Paling Banyak Habis</h3>
-                    <div style="position: relative; height: 400px; width: 100%;">
-                        <canvas id="laporanChart"></canvas>
+                    <div style="position: relative; width: 100%; min-height: 200px;">
+                        <ul id="laporanList"
+                            style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
+                            <li style="text-align:center; padding: 30px; color: var(--text-muted);">
+                                Silakan pilih rentang tanggal untuk melihat laporan.
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -674,7 +688,8 @@
     <div class="modal-overlay" id="modal-confirm-hapus" style="display:none"
         onclick="if(event.target===this)closeConfirmHapus()">
         <div class="modal" style="max-width:400px;width:95vw">
-            <h3 style="font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--text-secondary)">👁️‍🗨️ Konfirmasi Sembunyikan Barang</h3>
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--text-secondary)">👁️‍🗨️ Konfirmasi
+                Sembunyikan Barang</h3>
             <p id="confirm-hapus-text" style="color:var(--text-secondary);margin-bottom:20px;font-size:.875rem"></p>
             <div style="display:flex;gap:10px">
                 <button class="btn btn-secondary" style="flex:1" onclick="closeConfirmHapus()">Batal</button>
@@ -684,7 +699,6 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="../js/dashboard.js"></script>
     <script src="../js/admin.js"></script>
 </body>
