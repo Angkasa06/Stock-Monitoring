@@ -56,8 +56,28 @@ function getCategoryPrefix(cat) {
 
 function updateSkuPrefix() {
   const cat = document.getElementById('new-category').value;
-  const prefix = cat ? getCategoryPrefix(cat) + '-' : '-';
+  const rawPrefix = cat ? getCategoryPrefix(cat) : '';
+  const prefix = rawPrefix ? rawPrefix + '-' : '-';
   document.getElementById('sku-prefix-display').textContent = prefix;
+
+  // Temukan SKU tertinggi untuk kategori ini untuk suggestion
+  let maxNum = 0;
+  if (rawPrefix) {
+    const catProducts = products.filter(p => p.sku && p.sku.startsWith(rawPrefix + '-'));
+    catProducts.forEach(p => {
+      const parts = p.sku.split('-');
+      if (parts.length > 1) {
+        const numStr = parts[1];
+        if (!isNaN(numStr)) {
+          const num = parseInt(numStr, 10);
+          if (num > maxNum) maxNum = num;
+        }
+      }
+    });
+  }
+
+  const nextNumStr = (maxNum + 1).toString().padStart(3, '0');
+  document.getElementById('new-sku-number').placeholder = nextNumStr;
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -454,7 +474,7 @@ async function loadKeluarLog() {
 async function addNewProduct() {
   const name = document.getElementById('new-name').value.trim();
   const category = document.getElementById('new-category').value;
-  const unit = document.getElementById('new-unit').value.trim() || 'pcs';
+  const unit = document.getElementById('new-unit').value.trim();
   const price = parseFloat(document.getElementById('new-price').value);
   const stock = parseInt(document.getElementById('new-stock').value) || 0;
   const minStock = parseInt(document.getElementById('new-min-stock').value) || 10;
@@ -465,6 +485,7 @@ async function addNewProduct() {
 
   if (!name) { showToast('Nama produk wajib diisi!', 'error'); return; }
   if (!category) { showToast('Kategori wajib dipilih!', 'error'); return; }
+  if (!unit) { showToast('Satuan Unit wajib diisi!', 'error'); return; }
   if (!price || price < 0) { showToast('Harga harus diisi dan valid!', 'error'); return; }
 
   const btn = document.getElementById('btn-add-product');
@@ -491,10 +512,9 @@ async function addNewProduct() {
 }
 
 function resetNewProductForm() {
-  ['new-name', 'new-price', 'new-stock'].forEach(id => {
+  ['new-name', 'new-price', 'new-stock', 'new-unit'].forEach(id => {
     document.getElementById(id).value = '';
   });
-  document.getElementById('new-unit').value = 'pcs';
   document.getElementById('new-min-stock').value = '10';
   document.getElementById('new-category').value = '';
   
@@ -604,7 +624,7 @@ function unhideProduct(id) {
   
   // Pre-fill data dari produk yang tersembunyi
   document.getElementById('new-name').value = p.name;
-  document.getElementById('new-unit').value = p.unit || 'pcs';
+  document.getElementById('new-unit').value = p.unit || '';
   if (p.category) {
     document.getElementById('new-category').value = p.category;
   }

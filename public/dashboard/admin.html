@@ -445,19 +445,7 @@
                             <div class="form-group" style="grid-column:1/-1">
                                 <label class="form-label">Nama Produk *</label>
                                 <input type="text" class="form-control" id="new-name"
-                                    placeholder="Nama lengkap produk" />
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">SKU</label>
-                                <div
-                                    style="display: flex; align-items: stretch; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); overflow: hidden;">
-                                    <div id="sku-prefix-display"
-                                        style="padding: 10px 12px; background: var(--bg-secondary); color: var(--text-secondary); border-right: 1px solid var(--border); font-weight: 600; font-family: monospace;">
-                                        -</div>
-                                    <input type="text" class="form-control" id="new-sku-number" placeholder="006"
-                                        style="border: none; border-radius: 0; outline: none; box-shadow: none; flex: 1;"
-                                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
-                                </div>
+                                    placeholder="Nama lengkap produk" autocomplete="off" />
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Kategori *</label>
@@ -471,9 +459,25 @@
                                 </select>
                             </div>
                             <div class="form-group">
+                                <label class="form-label">SKU</label>
+                                <div
+                                    style="display: flex; align-items: stretch; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); overflow: hidden;">
+                                    <div id="sku-prefix-display"
+                                        style="padding: 10px 12px; background: var(--bg-secondary); color: var(--text-secondary); border-right: 1px solid var(--border); font-weight: 600; font-family: monospace;">
+                                        -</div>
+                                    <input type="text" class="form-control" id="new-sku-number" placeholder="001"
+                                        style="border: none; border-radius: 0; outline: none; box-shadow: none; flex: 1;"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <label class="form-label">Satuan Unit</label>
-                                <input type="text" class="form-control" id="new-unit" placeholder="pcs / dus / kg"
-                                    value="pcs" />
+                                <input list="unit-suggestions" class="form-control" id="new-unit" placeholder="Pilih atau ketik..."
+                                    value="" autocomplete="off" onfocus="try{this.showPicker()}catch(e){}" />
+                                <datalist id="unit-suggestions">
+                                    <option value="pcs">
+                                    <option value="dus">
+                                </datalist>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Harga (Rp) *</label>
