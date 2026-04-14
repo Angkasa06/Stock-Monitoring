@@ -56,15 +56,55 @@ router.post('/', verifyToken, requireRole('admin'), async (req, res) => {
     try {
         await conn.beginTransaction();
 
-        // Cek SKU duplikat jika diisi
-        if (sku && sku.trim()) {
-            const [[existing]] = await conn.execute('SELECT id FROM products WHERE sku = ?', [sku.trim()]);
-            if (existing) {
+        // 1. Cek Nama Duplikat (Case Insensitive)
+        const [[existingByName]] = await conn.execute('SELECT * FROM products WHERE LOWER(name) = ?', [name.trim().toLowerCase()]);
+
+        if (existingByName) {
+            if (existingByName.is_active === 1) {
                 await conn.rollback();
-                return res.status(400).json({ success: false, message: `Pendaftaran barang baru gagal. SKU "${sku}" sudah pernah digunakan dan tidak boleh digunakan kembali.` });
+                return res.status(400).json({ success: false, message: `Pendaftaran gagal. Produk "${existingByName.name}" sudah terdaftar dan aktif. Silakan gunakan menu Barang Masuk untuk menambah stok.` });
+            } else {
+                // Produk ada tapi tersembunyi. Aktifkan kembali sesuai data form.
+                const newStock = existingByName.stock + initialStock;
+                
+                await conn.execute(
+                    'UPDATE products SET category = ?, unit = ?, price = ?, stock = ?, minimum_stock = ?, is_active = 1, updated_at = NOW() WHERE id = ?',
+                    [category || 'Lainnya', unitVal, parseFloat(price), newStock, minStock, existingByName.id]
+                );
+
+                await logStockChange(conn, {
+                    productId: existingByName.id,
+                    productName: existingByName.name,
+                    productSku: existingByName.sku,
+                    userId: req.user.id,
+                    username: req.user.username,
+                    changeType: 'PRODUK_BARU',
+                    qtyChange: initialStock,
+                    stockBefore: existingByName.stock,
+                    stockAfter: newStock,
+                    note: `Produk tersembunyi diaktifkan kembali. Penambahan stok awal: ${initialStock} ${unitVal}.`,
+                    ipAddress: req.ip,
+                });
+
+                await conn.commit();
+                return res.status(201).json({
+                    success: true,
+                    message: `Produk "${existingByName.name}" berhasil diaktifkan kembali. Per sistem satu nama hanya untuk satu SKU, sehingga tetap menggunakan SKU aslinya (${existingByName.sku || '-'}).`,
+                    data: { productId: existingByName.id, name: existingByName.name, stock: newStock },
+                });
             }
         }
 
+        // 2. Cek SKU duplikat jika diisi (hanya untuk produk yang benar-benar baru)
+        if (sku && sku.trim()) {
+            const [[existingSkuItem]] = await conn.execute('SELECT id, name FROM products WHERE sku = ?', [sku.trim()]);
+            if (existingSkuItem) {
+                await conn.rollback();
+                return res.status(400).json({ success: false, message: `Pendaftaran gagal. SKU "${sku}" sudah pernah digunakan oleh produk "${existingSkuItem.name}" dan permanen tidak boleh digunakan kembali.` });
+            }
+        }
+
+        // 3. Insert produk baru
         const [result] = await conn.execute(
             `INSERT INTO products (name, sku, category, unit, price, stock, minimum_stock)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -259,6 +299,16 @@ router.patch('/:id', verifyToken, requireRole('admin'), async (req, res) => {
         }
 
         const newName = (name && name.trim()) ? name.trim() : product.name;
+        
+        // Cek apakah nama baru bertabrakan dengan nama produk lain
+        if (newName.toLowerCase() !== product.name.toLowerCase()) {
+            const [[existingByName]] = await conn.execute('SELECT id, name FROM products WHERE LOWER(name) = ? AND id != ?', [newName.toLowerCase(), productId]);
+            if (existingByName) {
+                await conn.rollback();
+                return res.status(400).json({ success: false, message: `Gagal memperbarui. Nama produk "${existingByName.name}" sudah digunakan oleh barang lain.` });
+            }
+        }
+
         const newPrice = (price !== undefined && price >= 0) ? parseFloat(price) : parseFloat(product.price);
         const newMinStock = (minimum_stock !== undefined && minimum_stock >= 1) ? parseInt(minimum_stock) : product.minimum_stock;
 
