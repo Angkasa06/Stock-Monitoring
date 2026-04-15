@@ -229,8 +229,11 @@ function filterDaftar() { renderDaftarTable(); }
 // BARANG MASUK
 // ──────────────────────────────────────────────────────────────
 function populateDropdowns() {
+  const active = products.filter(p => p.isActive === 1);
+  const maxLen = active.reduce((m, p) => Math.max(m, p.name.length), 0);
+  const pad = (name) => name + '\u00A0'.repeat(Math.max(0, maxLen - name.length + 3));
   const opts = '<option value="">-- Pilih Barang --</option>' +
-    products.filter(p => p.isActive === 1).map(p => `<option value="${p.id}">${p.icon} ${p.name} (Stok: ${p.stock} ${p.unit})</option>`).join('');
+    active.map(p => `<option value="${p.id}">${p.icon} ${pad(p.name)}${p.stock} ${p.unit}</option>`).join('');
   document.getElementById('masuk-product-id').innerHTML = opts;
   document.getElementById('keluar-product-id').innerHTML = opts;
 }

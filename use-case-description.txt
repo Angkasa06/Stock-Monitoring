@@ -6,32 +6,29 @@ DESKRIPSI USE CASE - SISTEM MONITORING STOK
 1. Login
 --------------------------------------------------------------------------------
 Use case name    : Login
-Deskripsi        : Use case ini memungkinkan admin untuk masuk ke dalam sistem
-                   dengan memasukkan kredensial yang valid, sehingga dapat
-                   mengakses dashboard pengelolaan stok.
+Deskripsi        : Use case ini memungkinkan admin untuk masuk ke dalam sistem dengan memasukkan kredensial yang valid, sehingga dapat mengakses dashboard pengelolaan stok.
 Aktor            : Admin
 Precondition     : Admin belum masuk ke dalam sistem (belum login).
+
 Main sequence    :
 1. Admin membuka halaman login pada aplikasi Stock Monitoring.
-2. Sistem menampilkan formulir login yang meminta username dan PIN.
-3. Admin mengisi username dan PIN, kemudian menekan tombol "Login".
+2. Sistem menampilkan formulir login yang meminta username dan password.
+3. Admin mengisi username dan password, kemudian menekan tombol "Login".
 4. Sistem memverifikasi bahwa kredensial yang dimasukkan benar dan sesuai
    dengan akun admin yang aktif.
 5. Sistem memberikan akses, membuat sesi login, dan mengarahkan admin ke
    halaman dashboard utama.
+
 Alternative sequences :
-1. Jika username atau PIN yang dimasukkan salah, sistem akan menampilkan pesan
-   kesalahan dan meminta admin untuk mencoba kembali.
-Post condition   : Admin berhasil masuk ke dalam sistem dan dapat mengakses
-                   seluruh fitur yang tersedia di dashboard.
+1. Jika username atau password yang dimasukkan salah, sistem akan menampilkan pesan kesalahan dan meminta admin untuk mencoba kembali.
+
+Post condition   : Admin berhasil masuk ke dalam sistem dan dapat mengakses seluruh fitur yang tersedia di dashboard.
 
 --------------------------------------------------------------------------------
 2. Notifikasi Stok
 --------------------------------------------------------------------------------
 Use case name    : Notifikasi Stok
-Deskripsi        : Use case ini memungkinkan admin untuk melihat daftar
-                   peringatan otomatis untuk produk yang stoknya sudah mencapai
-                   atau berada di bawah batas minimum yang ditentukan.
+Deskripsi        : Use case ini memungkinkan admin untuk melihat daftar peringatan otomatis untuk produk yang stoknya sudah mencapai atau berada di bawah batas minimum yang ditentukan.
 Aktor            : Admin
 Precondition     : Admin sudah masuk ke dalam sistem (sudah login).
 Main sequence    :
@@ -43,10 +40,8 @@ Main sequence    :
    visual berupa progress bar stok, serta label tingkat keparahan
    (Habis atau Tipis).
 Alternative sequences :
-1. Jika tidak ada produk yang stoknya di bawah batas minimum, sistem
-   menampilkan pesan bahwa semua stok dalam kondisi aman.
-Post condition   : Admin mengetahui produk mana saja yang perlu segera
-                   diisi ulang stoknya.
+1. Jika tidak ada produk yang stoknya di bawah batas minimum, sistem menampilkan pesan bahwa semua stok dalam kondisi aman.
+Post condition   : Admin mengetahui produk mana saja yang perlu segera diisi ulang stoknya.
 
 --------------------------------------------------------------------------------
 3. Daftar Barang
