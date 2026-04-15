@@ -510,21 +510,9 @@
 
             <!-- ══════════ CEK LAPORAN ══════════ -->
             <div class="content" id="section-laporan" style="display:none">
-                <div class="page-header"
-                    style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px;">
-                    <div>
-                        <h1>Cek Laporan</h1>
-                        <p>Laporan audit barang yang keluar berdasarkan rentang hari (paling banyak habis di kiri)</p>
-                    </div>
-                    <button class="btn btn-primary" onclick="window.print()">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px">
-                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                            <rect x="6" y="14" width="12" height="8"></rect>
-                        </svg>
-                        Cetak Laporan
-                    </button>
+                <div class="page-header">
+                    <h1>Cek Laporan</h1>
+                    <p>Laporan audit barang yang keluar berdasarkan rentang hari (paling banyak habis di kiri)</p>
                 </div>
                 <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <label style="font-size:.9rem; font-weight: 500;">Dari:</label>
@@ -535,8 +523,7 @@
                     <input type="date" class="form-control" id="laporan-end-date" style="width:auto;padding:8px 12px"
                         onchange="checkLoadLaporan()" />
 
-                    <button class="btn btn-secondary" onclick="checkLoadLaporan()"
-                        style="margin-left: 10px; padding: 8px 16px;">Terapkan</button>
+
                     <span id="laporan-empty-msg"
                         style="color:var(--text-muted); font-size: 0.85rem; margin-left:10px; display:none;">
                         Silakan pilih kedua tanggal untuk melihat diagram.

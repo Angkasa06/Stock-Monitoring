@@ -1,111 +1,214 @@
 ================================================================================
-USE CASE DESCRIPTIONS - STOCK MONITORING SYSTEM
+DESKRIPSI USE CASE - SISTEM MONITORING STOK
 ================================================================================
 
 --------------------------------------------------------------------------------
 1. Login
 --------------------------------------------------------------------------------
-Use Case Name : Authenticate User
-Summary       : The admin logs into the system by providing valid credentials to access the secure dashboard.
-Actor         : Admin
-Main Sequence :
-1. The admin requests to log into the system.
-2. The system displays the login form.
-3. The admin enters their username and PIN.
-4. The admin requests to submit the login credentials.
-5. The system validates that the credentials are correct and match an active admin account.
-6. The system grants access, establishes a session, and redirects the admin to the dashboard.
+Use case name    : Login
+Deskripsi        : Use case ini memungkinkan admin untuk masuk ke dalam sistem
+                   dengan memasukkan kredensial yang valid, sehingga dapat
+                   mengakses dashboard pengelolaan stok.
+Aktor            : Admin
+Precondition     : Admin belum masuk ke dalam sistem (belum login).
+Main sequence    :
+1. Admin membuka halaman login pada aplikasi Stock Monitoring.
+2. Sistem menampilkan formulir login yang meminta username dan PIN.
+3. Admin mengisi username dan PIN, kemudian menekan tombol "Login".
+4. Sistem memverifikasi bahwa kredensial yang dimasukkan benar dan sesuai
+   dengan akun admin yang aktif.
+5. Sistem memberikan akses, membuat sesi login, dan mengarahkan admin ke
+   halaman dashboard utama.
+Alternative sequences :
+1. Jika username atau PIN yang dimasukkan salah, sistem akan menampilkan pesan
+   kesalahan dan meminta admin untuk mencoba kembali.
+Post condition   : Admin berhasil masuk ke dalam sistem dan dapat mengakses
+                   seluruh fitur yang tersedia di dashboard.
 
 --------------------------------------------------------------------------------
-2. Notifikasi
+2. Notifikasi Stok
 --------------------------------------------------------------------------------
-Use Case Name : View Stock Notifications
-Summary       : The admin views automated alerts for products that have reached or dropped below their minimum stock threshold.
-Actor         : Admin
-Main Sequence :
-1. The admin requests to view the stock notifications.
-2. The system retrieves all products where the current stock is equal to or less than the minimum stock.
-3. The system displays the notification page. For each alert, the system displays the product name, SKU, current stock, minimum stock, a stock bar progression, and a visual severity indicator (Habis/Empty or Tipis/Low).
+Use case name    : Notifikasi Stok
+Deskripsi        : Use case ini memungkinkan admin untuk melihat daftar
+                   peringatan otomatis untuk produk yang stoknya sudah mencapai
+                   atau berada di bawah batas minimum yang ditentukan.
+Aktor            : Admin
+Precondition     : Admin sudah masuk ke dalam sistem (sudah login).
+Main sequence    :
+1. Admin memilih menu "Notifikasi Stok" pada sidebar dashboard.
+2. Sistem mengambil semua produk yang jumlah stoknya sama dengan atau kurang
+   dari batas stok minimum.
+3. Sistem menampilkan halaman notifikasi. Untuk setiap peringatan, sistem
+   menampilkan nama produk, SKU, stok saat ini, stok minimum, indikator
+   visual berupa progress bar stok, serta label tingkat keparahan
+   (Habis atau Tipis).
+Alternative sequences :
+1. Jika tidak ada produk yang stoknya di bawah batas minimum, sistem
+   menampilkan pesan bahwa semua stok dalam kondisi aman.
+Post condition   : Admin mengetahui produk mana saja yang perlu segera
+                   diisi ulang stoknya.
 
 --------------------------------------------------------------------------------
 3. Daftar Barang
 --------------------------------------------------------------------------------
-Use Case Name : View Product List
-Summary       : The admin views the complete list of products in the warehouse along with their current stock status.
-Actor         : Admin
-Main Sequence :
-1. The admin requests to view the product list.
-2. The system displays the complete list of products. For each product, the system displays the product icon, product name, SKU, category, price, current stock, minimum stock, and stock status.
+Use case name    : Daftar Barang
+Deskripsi        : Use case ini memungkinkan admin untuk melihat seluruh daftar
+                   produk yang ada di dalam gudang beserta informasi stok dan
+                   statusnya secara lengkap.
+Aktor            : Admin
+Precondition     : Admin sudah masuk ke dalam sistem (sudah login).
+Main sequence    :
+1. Admin memilih menu "Daftar Barang" pada sidebar dashboard.
+2. Sistem menampilkan seluruh daftar produk yang terdaftar. Untuk setiap
+   produk, sistem menampilkan nama produk, SKU, kategori, harga, stok saat
+   ini, stok minimum, dan status stok.
+3. Admin dapat melakukan pencarian produk berdasarkan nama atau SKU, serta
+   menyaring produk berdasarkan kategori.
+Alternative sequences :
+1. Jika tidak ada produk yang terdaftar, sistem menampilkan pesan bahwa
+   data produk masih kosong.
+Post condition   : Admin dapat melihat informasi lengkap seluruh produk
+                   yang ada di gudang.
 
 --------------------------------------------------------------------------------
 4. Barang Masuk
 --------------------------------------------------------------------------------
-Use Case Name : Add Incoming Stock
-Summary       : The admin adds new stock quantity to an existing product in the warehouse to replenish inventory.
-Actor         : Admin
-Main Sequence :
-1. The admin requests to add incoming stock.
-2. The system displays the incoming stock form.
-3. The admin selects a product, enters the incoming quantity, and optionally provides a note.
-4. The admin requests to submit the incoming stock data.
-5. The system displays a confirmation prompt containing the product name, the incoming quantity, and the total stock after addition.
-6. The admin confirms the incoming stock process.
-7. The system updates the product's stock in the database, records the activity to the system log, and displays a success message.
+Use case name    : Barang Masuk
+Deskripsi        : Use case ini memungkinkan admin untuk menambah jumlah stok
+                   pada produk yang sudah ada di dalam sistem, sebagai bentuk
+                   pencatatan barang yang masuk ke gudang.
+Aktor            : Admin
+Precondition     : Admin sudah masuk ke dalam sistem, dan produk yang akan
+                   ditambah stoknya sudah terdaftar di dalam sistem.
+Main sequence    :
+1. Admin memilih menu "Barang Masuk" pada sidebar dashboard.
+2. Sistem menampilkan formulir barang masuk.
+3. Admin memilih produk, mengisi jumlah barang yang masuk, dan mengisi
+   keterangan tambahan (opsional).
+4. Admin menekan tombol "Konfirmasi Barang Masuk".
+5. Sistem menampilkan jendela konfirmasi yang berisi nama produk, jumlah
+   yang masuk, dan total stok setelah penambahan.
+6. Admin menekan tombol "Ya, Konfirmasi" untuk melanjutkan.
+7. Sistem memperbarui stok produk di database, mencatat aktivitas ke log
+   sistem, dan menampilkan pesan berhasil.
+Alternative sequences :
+1. Jika admin tidak memilih produk atau tidak mengisi jumlah, sistem akan
+   menampilkan pesan peringatan dan membatalkan proses.
+Post condition   : Stok produk berhasil bertambah dan aktivitas tercatat
+                   di log sistem.
 
 --------------------------------------------------------------------------------
 5. Barang Keluar
 --------------------------------------------------------------------------------
-Use Case Name : Process Outgoing Stock
-Summary       : The admin reduces the stock of a product to record items leaving the warehouse.
-Actor         : Admin
-Main Sequence :
-1. The admin requests to process outgoing stock.
-2. The system displays the outgoing stock form.
-3. The admin selects a product, enters the outgoing quantity, and optionally provides a note.
-4. The admin requests to submit the outgoing stock data.
-5. The system validates that the current stock is sufficient for the requested outgoing quantity.
-6. The system displays a confirmation prompt containing the product name, the outgoing quantity, and the remaining stock after deduction.
-7. The admin confirms the outgoing stock process.
-8. The system updates the product's stock in the database, records the activity to the system log, and displays a success message.
+Use case name    : Barang Keluar
+Deskripsi        : Use case ini memungkinkan admin untuk mengurangi jumlah stok
+                   pada produk yang ada, sebagai bentuk pencatatan barang yang
+                   keluar dari gudang.
+Aktor            : Admin
+Precondition     : Admin sudah masuk ke dalam sistem, dan produk yang akan
+                   dikurangi stoknya sudah terdaftar serta memiliki stok yang
+                   cukup.
+Main sequence    :
+1. Admin memilih menu "Barang Keluar" pada sidebar dashboard.
+2. Sistem menampilkan formulir barang keluar.
+3. Admin memilih produk, mengisi jumlah barang yang keluar, dan mengisi
+   keterangan tambahan (opsional).
+4. Admin menekan tombol "Konfirmasi Barang Keluar".
+5. Sistem memvalidasi bahwa stok saat ini mencukupi untuk jumlah yang
+   diminta.
+6. Sistem menampilkan jendela konfirmasi yang berisi nama produk, jumlah
+   yang keluar, dan sisa stok setelah pengurangan.
+7. Admin menekan tombol "Ya, Konfirmasi" untuk melanjutkan.
+8. Sistem memperbarui stok produk di database, mencatat aktivitas ke log
+   sistem, dan menampilkan pesan berhasil.
+Alternative sequences :
+1. Jika jumlah barang keluar melebihi stok yang tersedia, sistem akan
+   menampilkan pesan kesalahan dan membatalkan proses.
+2. Jika admin tidak memilih produk atau tidak mengisi jumlah, sistem akan
+   menampilkan pesan peringatan dan membatalkan proses.
+Post condition   : Stok produk berhasil berkurang dan aktivitas tercatat
+                   di log sistem.
 
 --------------------------------------------------------------------------------
 6. Daftarkan Produk Baru
 --------------------------------------------------------------------------------
-Use Case Name : Register New Product
-Summary       : The admin registers a brand-new product that is not yet in the system into the warehouse inventory.
-Actor         : Admin
-Main Sequence :
-1. The admin requests to register a new product.
-2. The system displays the new product registration form.
-3. The admin enters the product name, SKU, category, unit type, price, initial stock, and minimum stock.
-4. The admin requests to submit the registered product data.
-5. The system validates that all required data (e.g., product name and valid price) has been filled.
-6. The system saves the new product into the database and displays a success message.
+Use case name    : Daftarkan Produk Baru
+Deskripsi        : Use case ini memungkinkan admin untuk mendaftarkan produk
+                   baru yang belum ada di dalam sistem ke dalam inventaris
+                   gudang.
+Aktor            : Admin
+Precondition     : Admin sudah masuk ke dalam sistem, dan produk yang akan
+                   didaftarkan belum pernah terdaftar sebelumnya.
+Main sequence    :
+1. Admin memilih menu "Daftarkan Produk Baru" pada sidebar dashboard.
+2. Sistem menampilkan formulir pendaftaran produk baru.
+3. Admin mengisi nama produk, kategori, SKU, satuan unit, harga, stok awal,
+   dan stok minimum.
+4. Admin menekan tombol "Daftarkan Produk".
+5. Sistem memvalidasi bahwa semua data yang wajib diisi (seperti nama produk
+   dan harga) sudah terisi dengan benar.
+6. Sistem menyimpan produk baru ke dalam database dan menampilkan pesan
+   berhasil.
+Alternative sequences :
+1. Jika nama produk sudah pernah terdaftar sebelumnya, sistem akan
+   menampilkan pesan peringatan dan membatalkan proses pendaftaran.
+2. Jika data wajib tidak diisi, sistem akan menampilkan pesan peringatan
+   dan meminta admin untuk melengkapi formulir.
+Post condition   : Produk baru berhasil terdaftar di dalam sistem dan
+                   siap digunakan untuk pencatatan barang masuk atau keluar.
 
 --------------------------------------------------------------------------------
 7. Cek Laporan
 --------------------------------------------------------------------------------
-Use Case Name : View Outflow Report
-Summary       : The admin views an audit report chart of the most depleted (outgoing) items based on a custom date range.
-Actor         : Admin
-Main Sequence :
-1. The admin requests to view the outflow report.
-2. The system displays the report page with empty start date and end date fields, and prompts the user to select the dates.
-3. The admin selects the start date and the end date using the calendar picker, then applies the filter.
-4. The system validates that the date range is valid (Start Date is not exceeding End Date).
-5. The system displays a bar chart reporting the most depleted items. For the chart, the system displays the names of the products and their total outgoing quantities within the specified date range.
+Use case name    : Cek Laporan
+Deskripsi        : Use case ini memungkinkan admin untuk melihat laporan audit
+                   berupa daftar produk yang paling banyak keluar dari gudang
+                   berdasarkan rentang tanggal yang dipilih secara bebas.
+Aktor            : Admin
+Precondition     : Admin sudah masuk ke dalam sistem, dan sudah terdapat
+                   riwayat barang keluar di dalam database.
+Main sequence    :
+1. Admin memilih menu "Cek Laporan" pada sidebar dashboard.
+2. Sistem menampilkan halaman laporan dengan kolom input tanggal awal
+   dan tanggal akhir yang masih kosong.
+3. Admin memilih tanggal awal dan tanggal akhir menggunakan kalender.
+4. Sistem secara otomatis memvalidasi bahwa rentang tanggal yang dipilih
+   valid (tanggal awal tidak boleh melebihi tanggal akhir).
+5. Sistem menampilkan laporan berupa daftar produk yang paling banyak
+   keluar, dilengkapi dengan nama produk dan total jumlah yang keluar
+   dalam rentang tanggal tersebut.
+Alternative sequences :
+1. Jika salah satu atau kedua tanggal belum dipilih, sistem menampilkan
+   pesan untuk meminta admin melengkapi pilihan tanggal.
+2. Jika tidak ada data barang keluar dalam rentang tanggal yang dipilih,
+   sistem menampilkan pesan bahwa tidak ada data yang ditemukan.
+Post condition   : Admin dapat melihat informasi produk yang paling banyak
+                   habis dalam periode waktu tertentu untuk keperluan audit.
 
 --------------------------------------------------------------------------------
 8. Log Sistem
 --------------------------------------------------------------------------------
-Use Case Name : View System Log
-Summary       : The admin views the immutable, automatically generated audit trail of all warehouse stock changes.
-Actor         : Admin
-Main Sequence :
-1. The admin requests to view the system log.
-2. The system displays the system log page.
-3. The admin optionally selects a log type filter (Barang Masuk, Barang Keluar, or Produk Baru).
-4. The system retrieves the relevant activity logs based on the filter.
-5. The system displays a paginated list of logs. For each log entry, the system displays the timestamp, log type, product name, SKU, quantity change, stock before, stock after, note, and the admin who performed the action.
+Use case name    : Log Sistem
+Deskripsi        : Use case ini memungkinkan admin untuk melihat catatan
+                   aktivitas seluruh perubahan stok yang dibuat secara otomatis
+                   oleh sistem sebagai jejak audit yang tidak dapat diubah.
+Aktor            : Admin
+Precondition     : Admin sudah masuk ke dalam sistem.
+Main sequence    :
+1. Admin memilih menu "Log Sistem" pada sidebar dashboard.
+2. Sistem menampilkan halaman log sistem.
+3. Admin dapat menyaring log berdasarkan jenis aktivitas (Barang Masuk,
+   Barang Keluar, atau Produk Baru).
+4. Sistem mengambil dan menampilkan daftar log yang sesuai dengan filter
+   yang dipilih secara otomatis.
+5. Sistem menampilkan daftar log dalam format halaman (paginasi). Untuk
+   setiap entri log, sistem menampilkan nomor urut, waktu, jenis aktivitas,
+   nama produk, SKU, perubahan jumlah stok, stok sebelum, stok sesudah,
+   keterangan, dan nama admin yang melakukan aksi.
+Alternative sequences :
+1. Jika tidak ada log yang sesuai dengan filter yang dipilih, sistem
+   menampilkan pesan bahwa tidak ada data yang ditemukan.
+Post condition   : Admin dapat memantau seluruh riwayat perubahan stok
+                   yang pernah terjadi di dalam sistem.
 
 ================================================================================
