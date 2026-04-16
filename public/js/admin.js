@@ -137,7 +137,6 @@ function updateNotifBadge(count) {
 // ── Notifikasi Page ───────────────────────────────────────────
 function renderNotifPage() {
   const alerts = products.filter(p => p.isActive === 1 && p.stock <= p.minStock);
-  const hiddens = products.filter(p => p.isActive === 0);
   let html = '';
 
   if (alerts.length) {
@@ -157,31 +156,12 @@ function renderNotifPage() {
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
           <span class="badge ${isEmpty ? 'badge-red' : 'badge-amber'}">${isEmpty ? 'HABIS' : 'TIPIS'}</span>
-          ${isEmpty ? `<button class="btn btn-sm btn-danger" onclick="confirmDeleteProduct(${p.id})">👁️‍🗨️ Hide</button>` : ''}
         </div>
       </div>`;
     }).join('');
     html += '</div>';
   } else {
     html += '<div class="alert alert-success">✅ Semua stok reguler dalam kondisi aman! Tidak ada peringatan.</div>';
-  }
-
-  if (hiddens.length) {
-    html += `<div class="card" style="margin-top: 20px;"><div class="card-header"><div class="card-title">👁️‍🗨️ Barang Tersembunyi (${hiddens.length} produk)</div></div>`;
-    html += hiddens.map(p => {
-      return `<div class="notif-item" style="opacity: 0.85;">
-        <div class="notif-icon" style="background:var(--bg-secondary);color:var(--text-muted)">${p.icon}</div>
-        <div style="flex:1">
-          <div class="notif-title" style="color:var(--text-secondary)">${p.name} <span style="font-size:.72rem;color:var(--text-muted)">(SKU: ${p.sku || '-'})</span></div>
-          <div class="notif-detail">Stok Terakhir: <strong>${p.stock} ${p.unit}</strong></div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
-          <span class="badge" style="background:var(--bg-secondary);color:var(--text-secondary)">HIDDEN</span>
-          <button class="btn btn-sm" style="background:var(--accent-green);color:white;border:none;" onclick="unhideProduct(${p.id})">Aktifkan Kembali</button>
-        </div>
-      </div>`;
-    }).join('');
-    html += '</div>';
   }
 
   document.getElementById('notif-content').innerHTML = html;
@@ -487,6 +467,7 @@ async function addNewProduct() {
   const sku = (prefix !== '-' && num) ? prefix + num : '';
 
   if (!name) { showToast('Nama produk wajib diisi!', 'error'); return; }
+  if (!sku) { showToast('SKU wajib diisi secara unik!', 'error'); return; }
   if (!category) { showToast('Kategori wajib dipilih!', 'error'); return; }
   if (!unit) { showToast('Satuan Unit wajib diisi!', 'error'); return; }
   if (!price || price < 0) { showToast('Harga harus diisi dan valid!', 'error'); return; }
@@ -568,81 +549,7 @@ async function saveEdit() {
   }
 }
 
-// ──────────────────────────────────────────────────────────────
-// HAPUS / HIDE PRODUK
-// ──────────────────────────────────────────────────────────────
-let pendingHapusId = null;
 
-function confirmDeleteProduct(id) {
-  const p = products.find(x => x.id === id);
-  if (!p) return;
-
-  pendingHapusId = id;
-  document.getElementById('confirm-hapus-text').innerHTML =
-    `Apakah Anda yakin ingin menyembunyikan produk <strong>${p.name}</strong>?<br>Sistem hanya akan menyembunyikannya (hide) sehingga riwayat laporannya tetap valid di daftar log.`;
-  document.getElementById('modal-confirm-hapus').style.display = 'flex';
-}
-
-function closeConfirmHapus() {
-  document.getElementById('modal-confirm-hapus').style.display = 'none';
-  pendingHapusId = null;
-}
-
-async function executeDeleteProduct() {
-  if (!pendingHapusId) return;
-
-  const btn = document.getElementById('btn-confirm-hapus');
-  btn.disabled = true;
-  btn.textContent = 'Menyembunyikan...';
-
-  try {
-    const res = await fetch(`/api/products/${pendingHapusId}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include'
-    });
-    const json = await res.json();
-    if (!json.success) {
-      showToast(json.message, 'error');
-      return;
-    }
-    showToast('✅ Berhasil menyembunyikan barang dari sistem', 'success');
-    closeConfirmHapus();
-    await loadProducts();
-    await loadLogs();
-  } catch (err) {
-    showToast('Gagal terhubung ke server.', 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Ya, Sembunyikan';
-  }
-}
-
-function unhideProduct(id) {
-  const p = products.find(x => x.id === id);
-  if (!p) return;
-  
-  // Arahkan ke tab Daftarkan Produk Baru
-  showSection('tambah-produk');
-  
-  // Pre-fill data dari produk yang tersembunyi
-  document.getElementById('new-name').value = p.name;
-  document.getElementById('new-unit').value = p.unit || '';
-  if (p.category) {
-    document.getElementById('new-category').value = p.category;
-  }
-  document.getElementById('new-price').value = p.price;
-  document.getElementById('new-min-stock').value = p.minStock;
-  
-  // Kosongkan field SKU (akan diset prefixnya) dan Stok Awal
-  document.getElementById('new-sku-number').value = '';
-  updateSkuPrefix();
-  document.getElementById('new-stock').value = '0';
-  
-  // Beri fokus ke field nama dan beri info
-  document.getElementById('new-name').focus();
-  showToast('Silakan lengkapi data produk baru untuk mengaktifkan kembali.', 'info');
-}
 
 // ──────────────────────────────────────────────────────────────
 // SYSTEM LOG (Immutable — dibuat otomatis oleh sistem)

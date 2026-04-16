@@ -44,6 +44,9 @@ router.post('/', verifyToken, requireRole('admin'), async (req, res) => {
     if (!name || !name.trim()) {
         return res.status(400).json({ success: false, message: 'Nama produk wajib diisi.' });
     }
+    if (!sku || !sku.trim()) {
+        return res.status(400).json({ success: false, message: 'SKU produk wajib diisi.' });
+    }
     if (!price || parseFloat(price) < 0) {
         return res.status(400).json({ success: false, message: 'Harga tidak valid.' });
     }
@@ -60,48 +63,15 @@ router.post('/', verifyToken, requireRole('admin'), async (req, res) => {
         const [[existingByName]] = await conn.execute('SELECT * FROM products WHERE LOWER(name) = ?', [name.trim().toLowerCase()]);
 
         if (existingByName) {
-            if (existingByName.is_active === 1) {
-                await conn.rollback();
-                return res.status(400).json({ success: false, message: `Pendaftaran gagal. Produk "${existingByName.name}" sudah terdaftar dan aktif. Silakan gunakan menu Barang Masuk untuk menambah stok.` });
-            } else {
-                // Produk ada tapi tersembunyi. Aktifkan kembali sesuai data form.
-                const newStock = existingByName.stock + initialStock;
-                
-                await conn.execute(
-                    'UPDATE products SET category = ?, unit = ?, price = ?, stock = ?, minimum_stock = ?, is_active = 1, updated_at = NOW() WHERE id = ?',
-                    [category || 'Lainnya', unitVal, parseFloat(price), newStock, minStock, existingByName.id]
-                );
-
-                await logStockChange(conn, {
-                    productId: existingByName.id,
-                    productName: existingByName.name,
-                    productSku: existingByName.sku,
-                    userId: req.user.id,
-                    username: req.user.username,
-                    changeType: 'PRODUK_BARU',
-                    qtyChange: initialStock,
-                    stockBefore: existingByName.stock,
-                    stockAfter: newStock,
-                    note: `Produk tersembunyi diaktifkan kembali. Penambahan stok awal: ${initialStock} ${unitVal}.`,
-                    ipAddress: req.ip,
-                });
-
-                await conn.commit();
-                return res.status(201).json({
-                    success: true,
-                    message: `Produk "${existingByName.name}" berhasil diaktifkan kembali. Per sistem satu nama hanya untuk satu SKU, sehingga tetap menggunakan SKU aslinya (${existingByName.sku || '-'}).`,
-                    data: { productId: existingByName.id, name: existingByName.name, stock: newStock },
-                });
-            }
+            await conn.rollback();
+            return res.status(400).json({ success: false, message: `Pendaftaran gagal. Produk "${existingByName.name}" sudah terdaftar dalam sistem dengan SKU "${existingByName.sku}". Anda tidak dapat menduplikasi nama produk.` });
         }
 
-        // 2. Cek SKU duplikat jika diisi (hanya untuk produk yang benar-benar baru)
-        if (sku && sku.trim()) {
-            const [[existingSkuItem]] = await conn.execute('SELECT id, name FROM products WHERE sku = ?', [sku.trim()]);
-            if (existingSkuItem) {
-                await conn.rollback();
-                return res.status(400).json({ success: false, message: `Pendaftaran gagal. SKU "${sku}" sudah pernah digunakan oleh produk "${existingSkuItem.name}" dan permanen tidak boleh digunakan kembali.` });
-            }
+        // 2. Cek SKU duplikat
+        const [[existingSkuItem]] = await conn.execute('SELECT id, name FROM products WHERE sku = ?', [sku.trim()]);
+        if (existingSkuItem) {
+            await conn.rollback();
+            return res.status(400).json({ success: false, message: `Pendaftaran gagal. SKU "${sku}" sudah digunakan oleh produk "${existingSkuItem.name}". Satu SKU hanya untuk satu barang unik.` });
         }
 
         // 3. Insert produk baru
@@ -299,7 +269,7 @@ router.patch('/:id', verifyToken, requireRole('admin'), async (req, res) => {
         }
 
         const newName = (name && name.trim()) ? name.trim() : product.name;
-        
+
         // Cek apakah nama baru bertabrakan dengan nama produk lain
         if (newName.toLowerCase() !== product.name.toLowerCase()) {
             const [[existingByName]] = await conn.execute('SELECT id, name FROM products WHERE LOWER(name) = ? AND id != ?', [newName.toLowerCase(), productId]);
@@ -332,113 +302,6 @@ router.patch('/:id', verifyToken, requireRole('admin'), async (req, res) => {
     }
 });
 
-// ============================================================
-// DELETE /api/products/:id — Soft delete produk (is_active = 0)
-// ============================================================
-router.delete('/:id', verifyToken, requireRole('admin'), async (req, res) => {
-    const productId = parseInt(req.params.id);
-
-    const conn = await db.getConnection();
-    try {
-        await conn.beginTransaction();
-
-        const [[product]] = await conn.execute(
-            'SELECT id, name, sku, stock FROM products WHERE id = ? AND is_active = 1 FOR UPDATE',
-            [productId]
-        );
-        if (!product) {
-            await conn.rollback();
-            return res.status(404).json({ success: false, message: 'Produk tidak ditemukan.' });
-        }
-
-        if (product.stock > 0) {
-            await conn.rollback();
-            return res.status(400).json({ success: false, message: 'Produk tidak dapat disembunyikan karena stok masih ada.' });
-        }
-
-        await conn.execute(
-            'UPDATE products SET is_active = 0, updated_at = NOW() WHERE id = ?',
-            [productId]
-        );
-
-        await logStockChange(conn, {
-            productId,
-            productName: product.name,
-            productSku: product.sku,
-            userId: req.user.id,
-            username: req.user.username,
-            changeType: 'HAPUS_PRODUK',
-            qtyChange: 0,
-            stockBefore: 0,
-            stockAfter: 0,
-            note: 'Produk disembunyikan dari sistem (is_active = 0).',
-            ipAddress: req.ip,
-        });
-
-        await conn.commit();
-        return res.json({ success: true, message: `Produk "${product.name}" berhasil disembunyikan dari sistem.` });
-    } catch (err) {
-        await conn.rollback();
-        console.error('Error DELETE /api/products/:id:', err);
-        return res.status(500).json({ success: false, message: 'Gagal menyembunyikan produk.' });
-    } finally {
-        conn.release();
-    }
-});
-
-// ============================================================
-// PATCH /api/products/:id/unhide — Mengaktifkan kembali produk
-// ============================================================
-router.patch('/:id/unhide', verifyToken, requireRole('admin'), async (req, res) => {
-    const productId = parseInt(req.params.id);
-
-    const conn = await db.getConnection();
-    try {
-        await conn.beginTransaction();
-
-        const [[product]] = await conn.execute(
-            'SELECT id, name, is_active FROM products WHERE id = ? FOR UPDATE',
-            [productId]
-        );
-        if (!product) {
-            await conn.rollback();
-            return res.status(404).json({ success: false, message: 'Produk tidak ditemukan.' });
-        }
-
-        if (product.is_active === 1) {
-            await conn.rollback();
-            return res.status(400).json({ success: false, message: 'Produk sudah dalam keadaan aktif.' });
-        }
-
-        await conn.execute(
-            'UPDATE products SET is_active = 1, updated_at = NOW() WHERE id = ?',
-            [productId]
-        );
-
-        await logStockChange(conn, {
-            productId,
-            productName: product.name,
-            productSku: product.sku,
-            userId: req.user.id,
-            username: req.user.username,
-            changeType: 'PRODUK_BARU',
-            qtyChange: 0,
-            stockBefore: 0,
-            stockAfter: 0,
-            note: 'Produk diaktifkan kembali / di-unhide (is_active = 1).',
-            ipAddress: req.ip,
-        });
-
-        await conn.commit();
-        return res.json({ success: true, message: `Produk "${product.name}" berhasil diaktifkan kembali.` });
-    } catch (err) {
-        await conn.rollback();
-        console.error('Error PATCH /api/products/:id/unhide:', err);
-        return res.status(500).json({ success: false, message: 'Gagal mengaktifkan kembali produk.' });
-    } finally {
-        conn.release();
-    }
-});
 
 // ============================================================
 // GET /api/products/logs — Ambil system log perubahan stok
