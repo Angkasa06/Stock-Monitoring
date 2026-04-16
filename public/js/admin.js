@@ -161,7 +161,7 @@ function renderNotifPage() {
     }).join('');
     html += '</div>';
   } else {
-    html += '<div class="alert alert-success">✅ Semua stok reguler dalam kondisi aman! Tidak ada peringatan.</div>';
+    html += '<div class="alert alert-success">Semua stok reguler dalam kondisi aman! Tidak ada peringatan.</div>';
   }
 
   document.getElementById('notif-content').innerHTML = html;
@@ -501,7 +501,7 @@ function resetNewProductForm() {
   });
   document.getElementById('new-min-stock').value = '10';
   document.getElementById('new-category').value = '';
-  
+
   document.getElementById('new-sku-number').value = '';
   updateSkuPrefix();
 }
