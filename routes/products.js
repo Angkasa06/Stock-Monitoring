@@ -25,7 +25,7 @@ router.get('/', verifyToken, requireRole('admin'), async (req, res) => {
         const [rows] = await db.execute(
             `SELECT id, name, sku, category, unit, price, stock, minimum_stock, is_active, created_at, updated_at
              FROM products
-             ORDER BY category, name`
+             ORDER BY sku ASC`
         );
         return res.json({ success: true, data: rows });
     } catch (err) {

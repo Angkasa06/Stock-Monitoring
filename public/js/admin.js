@@ -177,7 +177,7 @@ function renderDaftarTable() {
     p.isActive === 1 &&
     (!q || p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)) &&
     (!cat || p.category === cat)
-  );
+  ).sort((a, b) => a.sku.localeCompare(b.sku));
 
   const tbody = document.getElementById('daftar-tbody');
   if (!list.length) {
@@ -466,11 +466,38 @@ async function addNewProduct() {
   const num = document.getElementById('new-sku-number').value.trim();
   const sku = (prefix !== '-' && num) ? prefix + num : '';
 
-  if (!name) { showToast('Nama produk wajib diisi!', 'error'); return; }
-  if (!category) { showToast('Kategori wajib dipilih!', 'error'); return; }
-  if (!sku) { showToast('SKU wajib diisi! Pilih kategori lalu isi nomor SKU.', 'error'); return; }
-  if (!unit) { showToast('Satuan Unit wajib diisi!', 'error'); return; }
-  if (!price || price <= 0) { showToast('Harga harus diisi dan lebih dari 0!', 'error'); return; }
+  const emptyFields = [];
+  if (!name) emptyFields.push('Nama Produk');
+  if (!category) emptyFields.push('Kategori');
+  if (!num) emptyFields.push('Nomor SKU');
+  if (!unit) emptyFields.push('Satuan Unit');
+  if (!price || price <= 0) emptyFields.push('Harga');
+
+  let isNameDuplicate = false;
+  if (name) {
+    const existingByName = products.find(p => p.name.toLowerCase() === name.toLowerCase());
+    if (existingByName) isNameDuplicate = true;
+  }
+
+  let isSkuDuplicate = false;
+  if (category && num) {
+    const checkSku = prefix + num;
+    const existingBySku = products.find(p => p.sku === checkSku);
+    if (existingBySku) isSkuDuplicate = true;
+  } else if (!category && num) {
+    const existingByNum = products.find(p => p.sku && p.sku.endsWith(`-${num}`));
+    if (existingByNum) isSkuDuplicate = true;
+  }
+
+  if (emptyFields.length > 0 || isNameDuplicate || isSkuDuplicate) {
+    let errMsg = '';
+    if (emptyFields.length > 0) errMsg += `Data belum lengkap (${emptyFields.join(', ')}). `;
+    if (isNameDuplicate) errMsg += `Nama produk sudah terdaftar. `;
+    if (isSkuDuplicate) errMsg += `SKU tersebut telah digunakan.`;
+    
+    showToast(errMsg.trim(), 'error');
+    return;
+  }
 
   const btn = document.getElementById('btn-add-product');
   btn.disabled = true; btn.textContent = 'Menyimpan...';
