@@ -467,10 +467,10 @@ async function addNewProduct() {
   const sku = (prefix !== '-' && num) ? prefix + num : '';
 
   if (!name) { showToast('Nama produk wajib diisi!', 'error'); return; }
-  if (!sku) { showToast('SKU wajib diisi secara unik!', 'error'); return; }
   if (!category) { showToast('Kategori wajib dipilih!', 'error'); return; }
+  if (!sku) { showToast('SKU wajib diisi! Pilih kategori lalu isi nomor SKU.', 'error'); return; }
   if (!unit) { showToast('Satuan Unit wajib diisi!', 'error'); return; }
-  if (!price || price < 0) { showToast('Harga harus diisi dan valid!', 'error'); return; }
+  if (!price || price <= 0) { showToast('Harga harus diisi dan lebih dari 0!', 'error'); return; }
 
   const btn = document.getElementById('btn-add-product');
   btn.disabled = true; btn.textContent = 'Menyimpan...';
