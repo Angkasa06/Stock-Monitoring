@@ -197,21 +197,39 @@ loginForm.addEventListener('submit', async (e) => {
 
     try {
         // ── Panggil API backend ────────────────────────────────
-        const res = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',   // penting: agar cookie token tersimpan
-            body: JSON.stringify({ username, password }),
-        });
+        let res;
+        try {
+            res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',   // penting: agar cookie token tersimpan
+                body: JSON.stringify({ username, password }),
+            });
+        } catch (networkErr) {
+            // Fetch sendiri gagal → server mati atau tidak bisa dijangkau
+            setLoading(false);
+            showAlert('❌ Tidak dapat terhubung ke server. Pastikan server berjalan.', 'error');
+            passwordInput.value = '';
+            passwordInput.focus();
+            return;
+        }
 
-        const data = await res.json();
+        let data;
+        try {
+            data = await res.json();
+        } catch (parseErr) {
+            setLoading(false);
+            showAlert('❌ Respons server tidak valid. Coba lagi.', 'error');
+            passwordInput.value = '';
+            passwordInput.focus();
+            return;
+        }
 
         if (!data.success) {
             setLoading(false);
             showAlert(`❌ ${data.message}`, 'error');
             passwordInput.classList.add('is-invalid');
             passwordInput.value = '';          // hapus password yang salah
-            strengthWrap.classList.remove('show'); // sembunyikan strength bar
             passwordInput.focus();             // fokus kembali ke field password
             return;
         }
@@ -234,9 +252,9 @@ loginForm.addEventListener('submit', async (e) => {
 
     } catch (err) {
         setLoading(false);
-        showAlert('❌ Tidak dapat terhubung ke server. Pastikan server berjalan.', 'error');
+        showAlert('❌ Terjadi kesalahan tak terduga. Coba lagi.', 'error');
+        console.error('[Login] Unexpected error:', err);
         passwordInput.value = '';
-        strengthWrap.classList.remove('show');
         passwordInput.focus();
     }
 });
